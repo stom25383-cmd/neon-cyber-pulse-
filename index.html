@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neon Cyber-Pulse</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #05050a;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        #gameContainer {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        canvas {
+            background: radial-gradient(circle, #100a26 0%, #05050a 100%);
+            display: block;
+        }
+        /* Mobile Control Overlay */
+        #mobileControls {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 30px;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .btn {
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #00f0ff;
+            border-radius: 50%;
+            color: #00f0ff;
+            font-weight: bold;
+            font-size: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+        }
+        .btn:active {
+            background: rgba(0, 240, 255, 0.3);
+            box-shadow: 0 0 25px #00f0ff;
+        }
+        #pulseBtn {
+            border-color: #ff0055;
+            color: #ff0055;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.3);
+            width: 80px;
+            height: 80px;
+        }
+        #pulseBtn:active {
+            background: rgba(255, 0, 85, 0.3);
+            box-shadow: 0 0 25px #ff0055;
+        }
+        /* Start/Gameover UI Overlay */
+        #uiOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 5, 10, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            z-index: 20;
+            backdrop-filter: blur(8px);
+            transition: opacity 0.3s ease;
+        }
+        h1 {
+            font-size: 3.5rem;
+            color: #00f0ff;
+            text-shadow: 0 0 20px #00f0ff, 0 0 40px #ff0055;
+            margin-bottom: 20px;
+            text-align: center;
+            letter-spacing: 4px;
+        }
+        .instructions {
+            color: #8a8a9e;
+            margin-bottom: 40px;
+            text-align: center;
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+        #startBtn {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            background: transparent;
+            border: 2px solid #ff0055;
+            color: #ff0055;
+            cursor: pointer;
+            font-weight: bold;
+            letter-spacing: 2px;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
+            transition: all 0.2s ease;
+        }
+        #startBtn:hover {
+            background: #ff0055;
+            color: #fff;
+            box-shadow: 0 0 30px #ff0055;
+        }
+        .hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="gameContainer">
+    <canvas id="gameCanvas"></canvas>
+    
+    <!-- UI Overlay Screen -->
+    <div id="uiOverlay">
+        <h1 id="uiTitle">NEON CYBER-PULSE</h1>
+        <div class="instructions" id="uiInstructions">
+            [ KEYBOARD: Left/Right Arrows = Shift Lanes | Spacebar = Sonic Pulse ]<br>
+            [ MOBILE: Use Touch Buttons Overlay ]<br><br>
+            Match your Pulse with 'Glitch Obstacles' to blast them.<br>
+            Avoid solid walls. Speed scales with the Techno Rhythm!
+        </div>
+        <button id="startBtn">INITIALIZE PROTOCOL</button>
+    </div>
+
+    <!-- On-screen controls for mobile testing -->
+    <div id="mobileControls">
+        <div class="btn" id="leftBtn">←</div>
+        <div class="btn" id="pulseBtn">PULSE</div>
+        <div class="btn" id="rightBtn">→</div>
+    </div>
+</div>
+
+<script>
+/**
+ * Neon Cyber-Pulse - Production Grade Core Engine
+ */
+
+// --- Audio Synthesizer Class (Procedural Audio Engine) ---
+class AudioEngine {
+    constructor() {
+        this.ctx = null;
+        this.bpm = 125;
+        this.beatInterval = 60 / this.bpm;
+        this.nextBeatTime = 0;
+    }
+    init() {
+        if (!this.ctx) {
+            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    }
+    playBeat(time) {
+        if (!this.ctx) return;
+        // Kick Drum Synthesizer
+        let osc = this.ctx.createOscillator();
+        let gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        
+        osc.frequency.setValueAtTime(120, time);
+        osc.frequency.exponentialRampToValueAtTime(0.01, time + 0.3);
+        
+        gain.gain.setValueAtTime(0.4, time);
+        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.3);
+        
+        osc.start(time);
+        osc.stop(time + 0.3);
+
+        // Retro Synth Offbeat Bassline
+        let bassOsc = this.ctx.createOscillator();
+        let bassGain = this.ctx.createGain();
+        bassOsc.type = 'sawtooth';
+        bassOsc.connect(bassGain);
+        bassGain.connect(this.ctx.destination);
+
+        let notes = [55, 65.41, 73.42, 82.41]; // Cyber A, C, D, E frequencies
+        let currentNote = notes[Math.floor(Math.random() * notes.length)];
+        
+        bassOsc.frequency.setValueAtTime(currentNote, time + 0.15);
+        bassGain.gain.setValueAtTime(0.15, time + 0.15);
+        bassGain.gain.exponentialRampToValueAtTime(0.01, time + 0.3);
+        
+        bassOsc.start(time + 0.15);
+        bassOsc.stop(time + 0.3);
+    }
+    playPulseFx() {
+        if (!this.ctx) return;
+        let osc = this.ctx.createOscillator();
+        let gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        
+        osc.frequency.setValueAtTime(150, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.2);
+        
+        gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
+        
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.2);
+    }
+    playExplosionFx() {
+        if (!this.ctx) return;
+        let osc = this.ctx.createOscillator();
+        let gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        
+        osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.4);
+        
+        gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.4);
+        
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.4);
+    }
+    scheduler(gameTime) {
+        if (!this.ctx) return;
+        while (this.nextBeatTime < this.ctx.currentTime + 0.1) {
+            this.playBeat(this.nextBeatTime);
+            this.nextBeatTime += this.beatInterval;
+            // Trigger sync visual cue inside game engine
+            window.gameEngine.onBeatTrigger();
+        }
+    }
+}
+
+// --- Main Game Engine ---
+class CyberEngine {
+    constructor() {
+        this.canvas = document.getElementById('gameCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.audio = new AudioEngine();
+        
+        // Settings & Dimensions
+        this.resizeCanvas();
+        this.lanesCount = 3;
+        this.laneWidth = this.canvas.width / this.lanesCount;
+        
+        // Game States
+        this.isRunning = false;
+        this.score = 0;
+        this.highScore = localStorage.getItem('cyber_highscore') || 0;
+        this.speed = 400; // Base speed px/sec
+        this.maxSpeed = 1200;
+        this.level = 1;
+        this.themeColor = '#00f0ff';
+        this.pulseColor = '#ff0055';
+        
+        // Player Config
+        this.player = {
+            lane: 1, // Start middle
+            targetX: 0,
+            currentX: 0,
+            y: 0,
+            width: 40,
+            height: 40,
+            pulseActive: false,
+            pulseRadius: 0,
+            maxPulseRadius: 150
+        };
+        
+        this.obstacles = [];
+        this.particles = [];
+        this.lastTime = 0;
+        this.spawnTimer = 0;
+        this.beatPulseScale = 1;
+
+        window.addEventListener('resize', () => this.resizeCanvas());
+        this.initInput();
+    }
+
+    resizeCanvas() {
+        const targetWidth = Math.min(window.innerWidth, 600);
+        const targetHeight = window.innerHeight;
+        this.canvas.width = targetWidth;
+        this.canvas.height = targetHeight;
+        this.laneWidth = this.canvas.width / 3;
+        if (this.player) {
+            this.player.y = this.canvas.height - 150;
+            this.updatePlayerLaneInstant();
+        }
+    }
+
+    updatePlayerLaneInstant() {
+        this.player.targetX = this.player.lane * this.laneWidth + this.laneWidth / 2;
+        this.player.currentX = this.player.targetX;
+    }
+
+    initInput() {
+        // Desktop Inputs
+        window.addEventListener('keydown', (e) => {
+            if (!this.isRunning) return;
+            if (e.key === 'ArrowLeft' && this.player.lane > 0) {
+                this.player.lane--;
+            } else if (e.key === 'ArrowRight' && this.player.lane < 2) {
+                this.player.lane++;
+            } else if (e.key === ' ') {
+                this.triggerPulse();
+            }
+            this.player.targetX = this.player.lane * this.laneWidth + this.laneWidth / 2;
+        });
+
+        // Mobile Screen Overlay Inputs
+        document.getElementById('leftBtn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (this.player.lane > 0) this.player.lane--;
+            this.player.targetX = this.player.lane * this.laneWidth + this.laneWidth / 2;
+        });
+        document.getElementById('rightBtn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (this.player.lane < 2) this.player.lane++;
+            this.player.targetX = this.player.lane * this.laneWidth + this.laneWidth / 2;
+        });
+        document.getElementById('pulseBtn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            this.triggerPulse();
+        });
+    }
+
+    triggerPulse() {
+        if (!this.player.pulseActive) {
+            this.player.pulseActive = true;
+            this.player.pulseRadius = 0;
+            this.audio.playPulseFx();
+        }
+    }
+
+    onBeatTrigger() {
+        this.beatPulseScale = 1.25; // Beat impact visual effect
+    }
+
+    spawnObstacle() {
+        const types = ['SOLID', 'GLITCH']; // SOLID = Avoid, GLITCH = Destroyable via Pulse
+        const randomType = types[Math.floor(Math.random() * types.length)];
+        const randomLane = Math.floor(Math.random() * this.lanesCount);
+
+        this.obstacles.push({
+            lane: randomLane,
+            x: randomLane * this.laneWidth + this.laneWidth / 2,
+            y: -50,
+            size: 30,
+            type: randomType,
+            color: randomType === 'SOLID' ? this.themeColor : this.pulseColor
+        });
+    }
+
+    spawnExplosionParticles(x, y, color) {
+        for (let i = 0; i < 15; i++) {
+            this.particles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 400,
+                vy: (Math.random() - 0.5) * 400,
+                alpha: 1,
+                size: Math.random() * 4 + 2,
+                color: color
+            });
+        }
+    }
+
+    resetGame() {
+        this.score = 0;
+        this.speed = 400;
+        this.level = 1;
+        this.themeColor = '#00f0ff';
+        this.obstacles = [];
+        this.particles = [];
+        this.player.lane = 1;
+        this.updatePlayerLaneInstant();
+        this.isRunning = true;
+    }
+
+    gameOver() {
+        this.isRunning = false;
+        if (this.score > this.highScore) {
+            this.highScore = this.score;
+            localStorage.setItem('cyber_highscore', this.highScore);
+        }
+        document.getElementById('uiTitle').innerText = "SYSTEM CRASHED";
+        document.getElementById('uiTitle').style.color = "#ff0055";
+        document.getElementById('uiInstructions').innerHTML = `CORE SCORE: ${this.score}<br>LOCAL HIGHSCORE: ${this.highScore}<br><br>Re-initialize terminal connection to try again.`;
+        document.getElementById('startBtn').innerText = "REBOOT MATRIX";
+        document.getElementById('uiOverlay').classList.remove('hide');
+    }
+
+    updateEngine(dt) {
+        // Audio processing rhythm sync scheduler
+        if (this.audio.ctx) {
+            this.audio.scheduler();
+        }
+
+        // Handle beat bounce decay
+        if (this.beatPulseScale > 1) {
+            this.beatPulseScale -= dt * 2;
+        } else {
+            this.beatPulseScale = 1;
+        }
+
+        // Level scaling based on difficulty optimization
+        this.speed = Math.min(400 + (this.score * 8), this.maxSpeed);
+        if (this.score > 20 && this.level === 1) { this.level = 2; this.themeColor = '#bc00ff'; }
+        if (this.score > 50 && this.level === 2) { this.level = 3; this.themeColor = '#39ff14'; }
+
+        // Smooth player lane interpolation
+        this.player.currentX += (this.player.targetX - this.player.currentX) * 18 * dt;
+
+        // Player Sonic Pulse Processing
+        if (this.player.pulseActive) {
+            this.player.pulseRadius += dt * 600;
+            if (this.player.pulseRadius >= this.player.maxPulseRadius) {
+                this.player.pulseActive = false;
+                this.player.pulseRadius = 0;
+            }
+        }
+
+        // Spawning cycle
+        this.spawnTimer += dt;
+        let dynamicSpawnRate = Math.max(1.5 - (this.speed / 800), 0.5);
+        if (this.spawnTimer >= dynamicSpawnRate) {
+            this.spawnObstacle();
+            this.spawnTimer = 0;
+        }
+
+        // Update Particles
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            let p = this.particles[i];
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.alpha -= dt * 1.5;
+            if (p.alpha <= 0) this.particles.splice(i, 1);
+        }
+
+        // Update Obstacles & Collision Matrix
+        for (let i = this.obstacles.length - 1; i >= 0; i--) {
+            let obs = this.obstacles[i];
+            obs.y += this.speed * dt;
+
+            // 1. Sonic Pulse Wave Hit Detection (Glitch Items destruction)
+            if (this.player.pulseActive && obs.type === 'GLITCH') {
+                let dx = obs.x - this.player.currentX;
+                let dy = obs.y - this.player.y;
+                let distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance <= this.player.pulseRadius) {
+                    this.spawnExplosionParticles(obs.x, obs.y, obs.color);
+                    this.audio.playExplosionFx();
+                    this.obstacles.splice(i, 1);
+                    this.score += 2;
+                    continue;
+                }
+            }
+
+            // 2. Direct Body Collision Detection
+            let pDx = Math.abs(obs.x - this.player.currentX);
+            let pDy = Math.abs(obs.y - this.player.y);
+            if (pDx < (this.player.width/2 + obs.size/2) && pDy < (this.player.height/2 + obs.size/2)) {
+                if (obs.type === 'SOLID') {
+                    this.spawnExplosionParticles(this.player.currentX, this.player.y, '#ffffff');
+                    this.audio.playExplosionFx();
+                    this.gameOver();
+                    return;
+                } else {
+                    // Punished for running straight into a raw glitch without pulse protection
+                    this.spawnExplosionParticles(obs.x, obs.y, obs.color);
+                    this.audio.playExplosionFx();
+                    this.gameOver();
+                    return;
+                }
+            }
+
+            // Clean processing for out of screen assets
+            if (obs.y > this.canvas.height + 50) {
+                this.obstacles.splice(i, 1);
+                this.score++; // Score award for successful dodging
+            }
+        }
+    }
+
+    renderEngine() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Draw Ambient Scrolling Wireframes (3 Lanes Grid Layout)
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+        this.ctx.lineWidth = 2;
+        for (let i = 1; i < this.lanesCount; i++) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(i * this.laneWidth, 0);
+            this.ctx.lineTo(i * this.laneWidth, this.canvas.height);
+            this.ctx.stroke();
+        }
+
+        // Render Dynamic Pulse Shockwave Vector
+        if (this.player.pulseActive) {
+            this.ctx.save();
+            this.ctx.shadowBlur = 20;
+            this.ctx.shadowColor = this.pulseColor;
+            this.ctx.strokeStyle = this.pulseColor;
+            this.ctx.lineWidth = 4 * (1 - this.player.pulseRadius / this.player.maxPulseRadius);
+            this.ctx.beginPath();
+            this.ctx.arc(this.player.currentX, this.player.y, this.player.pulseRadius, 0, Math.PI * 2);
+            this.ctx.stroke();
+            this.ctx.restore();
+        }
+
+        // Render Obstacles 
+        this.obstacles.forEach(obs => {
+            this.ctx.save();
+            this.ctx.shadowBlur = 15 * this.beatPulseScale;
+            this.ctx.shadowColor = obs.color;
+            this.ctx.fillStyle = obs.color;
+
+            if (obs.type === 'SOLID') {
+                // High-tech Neon Triangular Wall Structure
+                this.ctx.beginPath();
+                this.ctx.moveTo(obs.x, obs.y - obs.size);
+                this.ctx.lineTo(obs.x - obs.size, obs.y + obs.size);
+                this.ctx.lineTo(obs.x + obs.size, obs.y + obs.size);
+                this.closeAndFill();
+            } else {
+                // Glitch Artifact Matrix (Diamond Shape)
+                this.ctx.beginPath();
+                this.ctx.moveTo(obs.x, obs.y - obs.size);
+                this.ctx.lineTo(obs.x + obs.size, obs.y);
+                this.ctx.lineTo(obs.x, obs.y + obs.size);
+                this.ctx.lineTo(obs.x - obs.size, obs.y);
+                this.closeAndFill();
+            }
+            this.ctx.restore();
+        });
+
+        // Render Particles System
+        this.particles.forEach(p => {
+            this.ctx.save();
+            this.ctx.globalAlpha = p.alpha;
+            this.ctx.fillStyle = p.color;
+            this.ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
+            this.ctx.restore();
+        });
+
+        // Render Hero Ship/Bike Structure
+        this.ctx.save();
+        this.ctx.shadowBlur = 25 * this.beatPulseScale;
+        this.ctx.shadowColor = this.themeColor;
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.strokeStyle = this.themeColor;
+        this.ctx.lineWidth = 3;
+        
+        // Custom Sci-Fi Vector Craft Design
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.player.currentX, this.player.y - this.player.height/2);
+        this.ctx.lineTo(this.player.currentX - this.player.width/2, this.player.y + this.player.height/2);
+        this.ctx.lineTo(this.player.currentX, this.player.y + this.player.height/4);
+        this.ctx.lineTo(this.player.currentX + this.player.width/2, this.player.y + this.player.height/2);
+        this.ctx.closePath();
+        this.ctx.fill();
+        this.ctx.stroke();
+        this.ctx.restore();
+
+        // Heads Up Dashboard (UI text rendering)
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.font = "bold 16px 'Courier New'";
+        this.ctx.fillText(`CORE CORE: ${this.score}`, 20, 40);
+        this.ctx.fillStyle = this.themeColor;
+        this.ctx.fillText(`MATRIX SEC: ${this.level}`, 20, 65);
+        this.ctx.fillStyle = '#ff0055';
+        this.ctx.fillText(`HZ VELOCITY: ${Math.floor(this.speed)}`, 20, 90);
+    }
+
+    closeAndFill() {
+        this.ctx.closePath();
+        this.ctx.fill();
+    }
+
+    loop(currentTime) {
+        if (!this.isRunning) return;
+        
+        // High Performance Delta Time Tracking
+        if (!this.lastTime) this.lastTime = currentTime;
+        let dt = (currentTime - this.lastTime) / 1000;
+        this.lastTime = currentTime;
+
+        // Cap performance frame drop spikes
+        if (dt > 0.1) dt = 0.1;
+
+        this.updateEngine(dt);
+        this.renderEngine();
+
+        requestAnimationFrame((time) => this.loop(time));
+    }
+}
+
+// Initialization Triggers
+window.gameEngine = new CyberEngine();
+
+document.getElementById('startBtn').addEventListener('click', () => {
+    window.gameEngine.audio.init();
+    document.getElementById('uiOverlay').classList.add('hide');
+    window.gameEngine.resetGame();
+    window.gameEngine.lastTime = 0;
+    requestAnimationFrame((time) => window.gameEngine.loop(time));
+});
+</script>
+
+</body>
+</html>
+
