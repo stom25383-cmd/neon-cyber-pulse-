@@ -1,42 +1,751 @@
-name: Build Android APK
-on:
-  push:
-    branches: [ main, master ]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neon Cyber-Pulse v2.0</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #05050a;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        #gameContainer {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        canvas {
+            background: radial-gradient(circle, #100a26 0%, #05050a 100%);
+            display: block;
+        }
+        /* Settings Icon */
+        #settingsIcon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #00f0ff;
+            border-radius: 8px;
+            color: #00f0ff;
+            font-size: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 15;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+        }
+        /* Settings Modal Panel */
+        #settingsPanel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 85%;
+            max-width: 350px;
+            background: rgba(10, 5, 25, 0.95);
+            border: 2px solid #ff0055;
+            box-shadow: 0 0 30px #ff0055;
+            border-radius: 12px;
+            padding: 25px;
+            color: white;
+            z-index: 30;
+            backdrop-filter: blur(10px);
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .settings-title {
+            text-align: center;
+            color: #ff0055;
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            border-bottom: 1px solid rgba(255, 0, 85, 0.3);
+            padding-bottom: 10px;
+        }
+        .setting-row {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .setting-row label {
+            color: #00f0ff;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        .setting-row input[type="range"] {
+            width: 100%;
+            accent-color: #ff0055;
+            cursor: pointer;
+        }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            color: #00f0ff;
+        }
+        .checkbox-container input {
+            width: 20px;
+            height: 20px;
+            accent-color: #ff0055;
+        }
+        #closeSettingsBtn {
+            background: transparent;
+            border: 2px solid #00f0ff;
+            color: #00f0ff;
+            padding: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+        #closeSettingsBtn:hover {
+            background: #00f0ff;
+            color: #000;
+        }
+        /* Mobile Control Layout */
+        #mobileControls {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 25px;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .btn {
+            width: 75px;
+            height: 75px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid #00f0ff;
+            border-radius: 50%;
+            color: #00f0ff;
+            font-weight: bold;
+            font-size: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+            transition: transform 0.1s;
+        }
+        .btn:active {
+            background: rgba(0, 240, 255, 0.2);
+            box-shadow: 0 0 25px #00f0ff;
+            transform: scale(0.9);
+        }
+        #pulseBtn {
+            border-color: #ff0055;
+            color: #ff0055;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.2);
+            width: 85px;
+            height: 85px;
+        }
+        #pulseBtn:active {
+            background: rgba(255, 0, 85, 0.2);
+            box-shadow: 0 0 25px #ff0055;
+        }
+        /* Static Interface Screens */
+        #uiOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 5, 10, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            z-index: 20;
+            backdrop-filter: blur(8px);
+        }
+        h1 {
+            font-size: 3rem;
+            color: #00f0ff;
+            text-shadow: 0 0 20px #00f0ff, 0 0 40px #ff0055;
+            margin-bottom: 20px;
+            text-align: center;
+            letter-spacing: 4px;
+        }
+        .instructions {
+            color: #8a8a9e;
+            margin-bottom: 40px;
+            text-align: center;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            padding: 0 15px;
+        }
+        #startBtn {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            background: transparent;
+            border: 2px solid #ff0055;
+            color: #ff0055;
+            cursor: pointer;
+            font-weight: bold;
+            letter-spacing: 2px;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
+        }
+        .hide { display: none !important; }
+    </style>
+</head>
+<body>
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Source Code
-        uses: actions/checkout@v3
+<div id="gameContainer">
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="settingsIcon">⚙️</div>
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
+    <!-- Live Custom Settings Dashboard -->
+    <div id="settingsPanel">
+        <div class="settings-title">MATRIX CONFIG</div>
+        <div class="setting-row">
+            <label><span>BUTTON SIZE</span><span id="sizeVal">75px</span></label>
+            <input type="range" id="btnSizeSlider" min="50" max="120" value="75">
+        </div>
+        <div class="setting-row">
+            <label class="checkbox-container">
+                <input type="checkbox" id="audioToggle" checked>
+                <span>ENABLE TECHNO AUDIO</span>
+            </label>
+        </div>
+        <button id="closeSettingsBtn">APPLY CONFIG</button>
+    </div>
+    
+    <!-- Core UI Overlay -->
+    <div id="uiOverlay">
+        <h1 id="uiTitle">NEON CYBER-PULSE</h1>
+        <div class="instructions" id="uiInstructions">
+            [ KEYBOARD: Left/Right Arrows | Spacebar = Pulse ]<br>
+            [ MOBILE: Adjustable Screen Buttons Layout ]<br><br>
+            Destroy 'Glitch Diamonds' with your energy pulse.<br>
+            Dodge vector walls. Speed auto-scales with rhythm!
+        </div>
+        <button id="startBtn">INITIALIZE PROTOCOL</button>
+    </div>
 
-      - name: Install Cordova & Build Platform
-        run: |
-          npm install -g cordova
-          cordova create build_dir com.neon.cyberpulse CyberPulse
-          cd build_dir
-          cordova platform add android
-          rm -rf www/*
-          cp -r ../index.html www/
-          
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: '17'
+    <!-- Standard Button System with Scale Vector Hooks -->
+    <div id="mobileControls">
+        <div class="btn" id="leftBtn">←</div>
+        <div class="btn" id="pulseBtn">PULSE</div>
+        <div class="btn" id="rightBtn">→</div>
+    </div>
+</div>
 
-      - name: Build Android Debug APK
-        run: |
-          cd build_dir
-          cordova build android --device
+<script>
+/**
+ * Neon Cyber-Pulse v2.0 - Core Engine Implementation
+ */
 
-      - name: Upload Finished APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: CyberPulse-Game-APK
-          path: build_dir/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+class AudioEngine {
+    constructor() {
+        this.ctx = null;
+        this.bpm = 125;
+        this.beatInterval = 60 / this.bpm;
+        this.nextBeatTime = 0;
+        this.enabled = true;
+    }
+    init() {
+        if (!this.ctx) {
+            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    }
+    playBeat(time) {
+        if (!this.ctx || !this.enabled) return;
+        let osc = this.ctx.createOscillator();
+        let gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.frequency.setValueAtTime(115, time);
+        osc.frequency.exponentialRampToValueAtTime(0.01, time + 0.25);
+        gain.gain.setValueAtTime(0.35, time);
+        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.25);
+        osc.start(time);
+        osc.stop(time + 0.25);
+
+        let bassOsc = this.ctx.createOscillator();
+        let bassGain = this.ctx.createGain();
+        bassOsc.type = 'sawtooth';
+        bassOsc.connect(bassGain);
+        bassGain.connect(this.ctx.destination);
+        let notes = [50, 58, 65, 73];
+        let currentNote = notes[Math.floor(Math.random() * notes.length)];
+        bassOsc.frequency.setValueAtTime(currentNote, time + 0.12);
+        bassGain.gain.setValueAtTime(0.12, time + 0.12);
+        bassGain.gain.exponentialRampToValueAtTime(0.01, time + 0.25);
+        bassOsc.start(time + 0.12);
+        bassOsc.stop(time + 0.25);
+    }
+    playPulseFx() {
+        if (!this.ctx || !this.enabled) return;
+        let osc = this.ctx.createOscillator();
+        let gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.frequency.setValueAtTime(160, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(900, this.ctx.currentTime + 0.18);
+        gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.18);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.18);
+    }
+    playExplosionFx() {
+        if (!this.ctx || !this.enabled) return;
+        let osc = this.ctx.createOscillator();
+        let gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.frequency.setValueAtTime(260, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.35);
+        gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.35);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.35);
+    }
+    scheduler() {
+        if (!this.ctx || !this.enabled) return;
+        while (this.nextBeatTime < this.ctx.currentTime + 0.1) {
+            this.playBeat(this.nextBeatTime);
+            this.nextBeatTime += this.beatInterval;
+            window.gameEngine.onBeatTrigger();
+        }
+    }
+}
+
+class CyberEngine {
+    constructor() {
+        this.canvas = document.getElementById('gameCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.audio = new AudioEngine();
+        
+        this.resizeCanvas();
+        this.lanesCount = 3;
+        this.laneWidth = this.canvas.width / this.lanesCount;
+        
+        this.isRunning = false;
+        this.isPaused = false;
+        this.score = 0;
+        this.highScore = localStorage.getItem('cyber_highscore') || 0;
+        this.speed = 400; 
+        this.maxSpeed = 1300;
+        this.level = 1;
+        this.themeColor = '#00f0ff';
+        this.pulseColor = '#ff0055';
+        
+        // Advanced Physics & Aesthetic State Tracker
+        this.player = {
+            lane: 1, 
+            targetX: 0,
+            currentX: 0,
+            y: 0,
+            width: 55,
+            height: 38,
+            tilt: 0, // Engine Vector math interpolation for vehicle drift physics
+            pulseActive: false,
+            pulseRadius: 0,
+            maxPulseRadius: 160
+        };
+        
+        this.obstacles = [];
+        this.particles = [];
+        this.lastTime = 0;
+        this.spawnTimer = 0;
+        this.beatPulseScale = 1;
+
+        window.addEventListener('resize', () => this.resizeCanvas());
+        this.initInputHooks();
+        this.initSettingsPanel();
+    }
+
+    resizeCanvas() {
+        const targetWidth = Math.min(window.innerWidth, 600);
+        this.canvas.width = targetWidth;
+        this.canvas.height = window.innerHeight;
+        this.laneWidth = this.canvas.width / 3;
+        if (this.player) {
+            this.player.y = this.canvas.height - 160;
+            this.updatePlayerLaneInstant();
+        }
+    }
+
+    updatePlayerLaneInstant() {
+        this.player.targetX = this.player.lane * this.laneWidth + this.laneWidth / 2;
+        this.player.currentX = this.player.targetX;
+    }
+
+    initInputHooks() {
+        window.addEventListener('keydown', (e) => {
+            if (!this.isRunning || this.isPaused) return;
+            if (e.key === 'ArrowLeft' && this.player.lane > 0) {
+                this.player.lane--;
+            } else if (e.key === 'ArrowRight' && this.player.lane < 2) {
+                this.player.lane++;
+            } else if (e.key === ' ') {
+                this.triggerPulse();
+            }
+            this.player.targetX = this.player.lane * this.laneWidth + this.laneWidth / 2;
+        });
+
+        // Touch Control Triggers Mapping
+        const leftHandler = (e) => { e.preventDefault(); if (this.isRunning && !this.isPaused && this.player.lane > 0) this.player.lane--; this.refreshTarget(); };
+        const rightHandler = (e) => { e.preventDefault(); if (this.isRunning && !this.isPaused && this.player.lane < 2) this.player.lane++; this.refreshTarget(); };
+        
+        document.getElementById('leftBtn').addEventListener('touchstart', leftHandler);
+        document.getElementById('rightBtn').addEventListener('touchstart', rightHandler);
+        document.getElementById('pulseBtn').addEventListener('touchstart', (e) => { e.preventDefault(); if(this.isRunning && !this.isPaused) this.triggerPulse(); });
+    }
+
+    refreshTarget() {
+        this.player.targetX = this.player.lane * this.laneWidth + this.laneWidth / 2;
+    }
+
+    initSettingsPanel() {
+        const panel = document.getElementById('settingsPanel');
+        const icon = document.getElementById('settingsIcon');
+        const closeBtn = document.getElementById('closeSettingsBtn');
+        const slider = document.getElementById('btnSizeSlider');
+        const sizeVal = document.getElementById('sizeVal');
+        const audioChk = document.getElementById('audioToggle');
+
+        icon.addEventListener('click', () => {
+            if (!this.isRunning) return;
+            this.isPaused = true;
+            panel.style.display = 'flex';
+        });
+
+        closeBtn.addEventListener('click', () => {
+            this.isPaused = false;
+            panel.style.display = 'none';
+            this.lastTime = performance.now(); // Prevents system timeline jumps
+            if(this.isRunning) requestAnimationFrame((time) => this.loop(time));
+        });
+
+        slider.addEventListener('input', (e) => {
+            const val = e.target.value;
+            sizeVal.innerText = val + 'px';
+            // Scale UI Layout system dynamically
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.style.width = val + 'px';
+                btn.style.height = val + 'px';
+                if(btn.id === 'pulseBtn') {
+                    btn.style.width = (parseInt(val) + 10) + 'px';
+                    btn.style.height = (parseInt(val) + 10) + 'px';
+                }
+            });
+        });
+
+        audioChk.addEventListener('change', (e) => {
+            this.audio.enabled = e.target.checked;
+        });
+    }
+
+    triggerPulse() {
+        if (!this.player.pulseActive) {
+            this.player.pulseActive = true;
+            this.player.pulseRadius = 0;
+            this.audio.playPulseFx();
+        }
+    }
+
+    onBeatTrigger() {
+        this.beatPulseScale = 1.3;
+    }
+
+    spawnObstacle() {
+        const types = ['SOLID', 'GLITCH'];
+        const type = types[Math.floor(Math.random() * types.length)];
+        const lane = Math.floor(Math.random() * this.lanesCount);
+
+        this.obstacles.push({
+            lane: lane,
+            x: lane * this.laneWidth + this.laneWidth / 2,
+            y: -60,
+            size: 28,
+            type: type,
+            color: type === 'SOLID' ? this.themeColor : this.pulseColor
+        });
+    }
+
+    spawnExplosionParticles(x, y, color) {
+        for (let i = 0; i < 16; i++) {
+            this.particles.push({
+                x: x, y: y,
+                vx: (Math.random() - 0.5) * 450,
+                vy: (Math.random() - 0.5) * 450,
+                alpha: 1,
+                size: Math.random() * 4 + 2,
+                color: color
+            });
+        }
+    }
+
+    resetGame() {
+        this.score = 0;
+        this.speed = 400;
+        this.level = 1;
+        this.themeColor = '#00f0ff';
+        this.obstacles = [];
+        this.particles = [];
+        this.player.lane = 1;
+        this.updatePlayerLaneInstant();
+        this.isPaused = false;
+        this.isRunning = true;
+    }
+
+    gameOver() {
+        this.isRunning = false;
+        if (this.score > this.highScore) {
+            this.highScore = this.score;
+            localStorage.setItem('cyber_highscore', this.highScore);
+        }
+        document.getElementById('uiTitle').innerText = "SYSTEM INTRUSION";
+        document.getElementById('uiTitle').style.color = "#ff0055";
+        document.getElementById('uiInstructions').innerHTML = `INTEGRITY SCORE: ${this.score}<br>TERMINAL HIGH: ${this.highScore}<br><br>Re-verify credentials to load circuit.`;
+        document.getElementById('startBtn').innerText = "REBOOT FRAME";
+        document.getElementById('uiOverlay').classList.remove('hide');
+    }
+
+    updateEngine(dt) {
+        if (this.isPaused) return;
+
+        if (this.audio.ctx && this.audio.enabled) {
+            this.audio.scheduler();
+        }
+
+        if (this.beatPulseScale > 1) this.beatPulseScale -= dt * 2.5;
+        else this.beatPulseScale = 1;
+
+        this.speed = Math.min(420 + (this.score * 9), this.maxSpeed);
+        if (this.score > 25 && this.level === 1) { this.level = 2; this.themeColor = '#bd00ff'; }
+        if (this.score > 60 && this.level === 2) { this.level = 3; this.themeColor = '#00ff66'; }
+
+        // Dynamic Craft Drift Interpolation Architecture
+        let lastX = this.player.currentX;
+        this.player.currentX += (this.player.targetX - this.player.currentX) * 16 * dt;
+        
+        // Physics Engine Vector Tracking: Set car tilt angle based on real horizontal delta velocity
+        let horizontalSpeed = this.player.currentX - lastX;
+        this.player.tilt = horizontalSpeed * 0.04; 
+
+        if (this.player.pulseActive) {
+            this.player.pulseRadius += dt * 650;
+            if (this.player.pulseRadius >= this.player.maxPulseRadius) {
+                this.player.pulseActive = false;
+            }
+        }
+
+        this.spawnTimer += dt;
+        let spawnInterval = Math.max(1.4 - (this.speed / 850), 0.45);
+        if (this.spawnTimer >= spawnInterval) {
+            this.spawnObstacle();
+            this.spawnTimer = 0;
+        }
+
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            let p = this.particles[i];
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.alpha -= dt * 1.6;
+            if (p.alpha <= 0) this.particles.splice(i, 1);
+        }
+
+        for (let i = this.obstacles.length - 1; i >= 0; i--) {
+            let obs = this.obstacles[i];
+            obs.y += this.speed * dt;
+
+            if (this.player.pulseActive && obs.type === 'GLITCH') {
+                let dx = obs.x - this.player.currentX;
+                let dy = obs.y - this.player.y;
+                if (Math.sqrt(dx*dx + dy*dy) <= this.player.pulseRadius) {
+                    this.spawnExplosionParticles(obs.x, obs.y, obs.color);
+                    this.audio.playExplosionFx();
+                    this.obstacles.splice(i, 1);
+                    this.score += 3;
+                    continue;
+                }
+            }
+
+            let boxX = Math.abs(obs.x - this.player.currentX);
+            let boxY = Math.abs(obs.y - this.player.y);
+            if (boxX < (this.player.width/2 + obs.size/1.8) && boxY < (this.player.height/2 + obs.size/1.8)) {
+                this.spawnExplosionParticles(this.player.currentX, this.player.y, '#ffffff');
+                this.audio.playExplosionFx();
+                this.gameOver();
+                return;
+            }
+
+            if (obs.y > this.canvas.height + 60) {
+                this.obstacles.splice(i, 1);
+                this.score++;
+            }
+        }
+    }
+
+    renderEngine() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Vector Wireframe Arena Rendering
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.025)';
+        this.ctx.lineWidth = 2;
+        for (let i = 1; i < this.lanesCount; i++) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(i * this.laneWidth, 0);
+            this.ctx.lineTo(i * this.laneWidth, this.canvas.height);
+            this.ctx.stroke();
+        }
+
+        // Render Shockwave Field
+        if (this.player.pulseActive) {
+            this.ctx.save();
+            this.ctx.shadowBlur = 22;
+            this.ctx.shadowColor = this.pulseColor;
+            this.ctx.strokeStyle = this.pulseColor;
+            this.ctx.lineWidth = 5 * (1 - this.player.pulseRadius / this.player.maxPulseRadius);
+            this.ctx.beginPath();
+            this.ctx.arc(this.player.currentX, this.player.y, this.player.pulseRadius, 0, Math.PI * 2);
+            this.ctx.stroke();
+            this.ctx.restore();
+        }
+
+        // Render Obstacles (Walls / Data Nodes)
+        this.obstacles.forEach(obs => {
+            this.ctx.save();
+            this.ctx.shadowBlur = 16 * this.beatPulseScale;
+            this.ctx.shadowColor = obs.color;
+            this.ctx.fillStyle = obs.color;
+
+            if (obs.type === 'SOLID') {
+                this.ctx.beginPath();
+                this.ctx.moveTo(obs.x, obs.y - obs.size);
+                this.ctx.lineTo(obs.x - obs.size, obs.y + obs.size);
+                this.ctx.lineTo(obs.x + obs.size, obs.y + obs.size);
+                this.ctx.closePath();
+                this.ctx.fill();
+            } else {
+                this.ctx.beginPath();
+                this.ctx.moveTo(obs.x, obs.y - obs.size);
+                this.ctx.lineTo(obs.x + obs.size, obs.y);
+                this.ctx.lineTo(obs.x, obs.y + obs.size);
+                this.ctx.lineTo(obs.x - obs.size, obs.y);
+                this.ctx.closePath();
+                this.ctx.fill();
+            }
+            this.ctx.restore();
+        });
+
+        // Particles System Build
+        this.particles.forEach(p => {
+            this.ctx.save();
+            this.ctx.globalAlpha = p.alpha;
+            this.ctx.fillStyle = p.color;
+            this.ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
+            this.ctx.restore();
+        });
+
+        // 🏎️ PRO UPGRADE: High-End Interactive Cyberpunk Car Design Rendering
+        this.ctx.save();
+        this.ctx.translate(this.player.currentX, this.player.y);
+        this.ctx.rotate(this.player.tilt); // Dynamic rotation rendering based on drift physics
+        this.ctx.shadowBlur = 25 * this.beatPulseScale;
+        this.ctx.shadowColor = this.themeColor;
+        this.ctx.strokeStyle = this.themeColor;
+        this.ctx.lineWidth = 3;
+
+        let w = this.player.width / 2;
+        let h = this.player.height / 2;
+
+        // Draw Car Outer Chassis Vector Geometric Architecture
+        this.ctx.fillStyle = '#0a0518';
+        this.ctx.beginPath();
+        this.ctx.moveTo(-w + 8, -h);     // Front Nose Left
+        this.ctx.lineTo(w - 8, -h);      // Front Nose Right
+        this.ctx.lineTo(w, -h + 12);     // Wheel Arch Front Right
+        this.ctx.lineTo(w - 4, h - 8);   // Side Skirt Right
+        this.ctx.lineTo(w + 6, h);       // Rear Wing Spoiler Right
+        this.ctx.lineTo(-w - 6, h);      // Rear Wing Spoiler Left
+        this.ctx.lineTo(-w + 4, h - 8);  // Side Skirt Left
+        this.ctx.lineTo(-w, -h + 12);    // Wheel Arch Front Left
+        this.ctx.closePath();
+        this.ctx.fill();
+        this.ctx.stroke();
+
+        // Neon Glow Windshield Core Element
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.beginPath();
+        this.ctx.moveTo(-w + 14, -h + 14);
+        this.ctx.lineTo(w - 14, -h + 14);
+        this.ctx.lineTo(w - 18, 0);
+        this.ctx.lineTo(-w + 18, 0);
+        this.ctx.closePath();
+        this.ctx.fill();
+        this.ctx.stroke();
+
+        this.ctx.restore();
+
+        // Canvas UI Metadata Rendering
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.font = "bold 16px 'Courier New'";
+        this.ctx.fillText(`PULSE SCORE: ${this.score}`, 20, 40);
+        this.ctx.fillStyle = this.themeColor;
+        this.ctx.fillText(`LEVEL STEP: ${this.level}`, 20, 65);
+        this.ctx.fillStyle = '#ff0055';
+        this.ctx.fillText(`HZ CLOCK  : ${Math.floor(this.speed)}`, 20, 90);
+    }
+
+    loop(currentTime) {
+        if (!this.isRunning || this.isPaused) return;
+        
+        if (!this.lastTime) this.lastTime = currentTime;
+        let dt = (currentTime - this.lastTime) / 1000;
+        this.lastTime = currentTime;
+
+        if (dt > 0.1) dt = 0.1; // Execution safeguard boundary condition
+
+        this.updateEngine(dt);
+        this.renderEngine();
+
+        requestAnimationFrame((time) => this.loop(time));
+    }
+}
+
+// Global Core Ignition Handler
+window.gameEngine = new CyberEngine();
+
+document.getElementById('startBtn').addEventListener('click', () => {
+    window.gameEngine.audio.init();
+    document.getElementById('uiOverlay').classList.add('hide');
+    window.gameEngine.resetGame();
+    window.gameEngine.lastTime = performance.now();
+    requestAnimationFrame((time) => window.gameEngine.loop(time));
+});
+</script>
+
+</body>
+</html>
