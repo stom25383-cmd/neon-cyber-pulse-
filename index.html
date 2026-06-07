@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Neon Cyber-Pulse</title>
+    <title>Neon Cyber-Pulse v2.0</title>
     <style>
         * {
             box-sizing: border-box;
@@ -31,50 +31,144 @@
             background: radial-gradient(circle, #100a26 0%, #05050a 100%);
             display: block;
         }
-        /* Mobile Control Overlay */
+        /* Settings Icon */
+        #settingsIcon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #00f0ff;
+            border-radius: 8px;
+            color: #00f0ff;
+            font-size: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 15;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+        }
+        /* Settings Modal Panel */
+        #settingsPanel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 85%;
+            max-width: 350px;
+            background: rgba(10, 5, 25, 0.95);
+            border: 2px solid #ff0055;
+            box-shadow: 0 0 30px #ff0055;
+            border-radius: 12px;
+            padding: 25px;
+            color: white;
+            z-index: 30;
+            backdrop-filter: blur(10px);
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .settings-title {
+            text-align: center;
+            color: #ff0055;
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            border-bottom: 1px solid rgba(255, 0, 85, 0.3);
+            padding-bottom: 10px;
+        }
+        .setting-row {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .setting-row label {
+            color: #00f0ff;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        .setting-row input[type="range"] {
+            width: 100%;
+            accent-color: #ff0055;
+            cursor: pointer;
+        }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            color: #00f0ff;
+        }
+        .checkbox-container input {
+            width: 20px;
+            height: 20px;
+            accent-color: #ff0055;
+        }
+        #closeSettingsBtn {
+            background: transparent;
+            border: 2px solid #00f0ff;
+            color: #00f0ff;
+            padding: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+        #closeSettingsBtn:hover {
+            background: #00f0ff;
+            color: #000;
+        }
+        /* Mobile Control Layout */
         #mobileControls {
             position: absolute;
-            bottom: 20px;
+            bottom: 30px;
             left: 0;
             width: 100%;
             display: flex;
             justify-content: space-between;
-            padding: 0 30px;
+            align-items: center;
+            padding: 0 25px;
             pointer-events: none;
             z-index: 10;
         }
         .btn {
-            width: 70px;
-            height: 70px;
-            background: rgba(255, 255, 255, 0.05);
+            width: 75px;
+            height: 75px;
+            background: rgba(255, 255, 255, 0.03);
             border: 2px solid #00f0ff;
             border-radius: 50%;
             color: #00f0ff;
             font-weight: bold;
-            font-size: 20px;
+            font-size: 24px;
             display: flex;
             justify-content: center;
             align-items: center;
             pointer-events: auto;
             backdrop-filter: blur(5px);
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+            transition: transform 0.1s;
         }
         .btn:active {
-            background: rgba(0, 240, 255, 0.3);
+            background: rgba(0, 240, 255, 0.2);
             box-shadow: 0 0 25px #00f0ff;
+            transform: scale(0.9);
         }
         #pulseBtn {
             border-color: #ff0055;
             color: #ff0055;
-            box-shadow: 0 0 15px rgba(255, 0, 85, 0.3);
-            width: 80px;
-            height: 80px;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.2);
+            width: 85px;
+            height: 85px;
         }
         #pulseBtn:active {
-            background: rgba(255, 0, 85, 0.3);
+            background: rgba(255, 0, 85, 0.2);
             box-shadow: 0 0 25px #ff0055;
         }
-        /* Start/Gameover UI Overlay */
+        /* Static Interface Screens */
         #uiOverlay {
             position: absolute;
             top: 0;
@@ -89,10 +183,9 @@
             color: #fff;
             z-index: 20;
             backdrop-filter: blur(8px);
-            transition: opacity 0.3s ease;
         }
         h1 {
-            font-size: 3.5rem;
+            font-size: 3rem;
             color: #00f0ff;
             text-shadow: 0 0 20px #00f0ff, 0 0 40px #ff0055;
             margin-bottom: 20px;
@@ -104,7 +197,8 @@
             margin-bottom: 40px;
             text-align: center;
             line-height: 1.6;
-            font-size: 1rem;
+            font-size: 0.95rem;
+            padding: 0 15px;
         }
         #startBtn {
             padding: 15px 40px;
@@ -116,17 +210,8 @@
             font-weight: bold;
             letter-spacing: 2px;
             box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
-            transition: all 0.2s ease;
         }
-        #startBtn:hover {
-            background: #ff0055;
-            color: #fff;
-            box-shadow: 0 0 30px #ff0055;
-        }
-        .hide {
-            opacity: 0;
-            pointer-events: none;
-        }
+        .hide { display: none !important; }
     </style>
 </head>
 <body>
@@ -134,19 +219,34 @@
 <div id="gameContainer">
     <canvas id="gameCanvas"></canvas>
     
-    <!-- UI Overlay Screen -->
+    <div id="settingsIcon">⚙️</div>
+
+    <div id="settingsPanel">
+        <div class="settings-title">MATRIX CONFIG</div>
+        <div class="setting-row">
+            <label><span>BUTTON SIZE</span><span id="sizeVal">75px</span></label>
+            <input type="range" id="btnSizeSlider" min="50" max="120" value="75">
+        </div>
+        <div class="setting-row">
+            <label class="checkbox-container">
+                <input type="checkbox" id="audioToggle" checked>
+                <span>ENABLE TECHNO AUDIO</span>
+            </label>
+        </div>
+        <button id="closeSettingsBtn">APPLY CONFIG</button>
+    </div>
+    
     <div id="uiOverlay">
         <h1 id="uiTitle">NEON CYBER-PULSE</h1>
         <div class="instructions" id="uiInstructions">
-            [ KEYBOARD: Left/Right Arrows = Shift Lanes | Spacebar = Sonic Pulse ]<br>
-            [ MOBILE: Use Touch Buttons Overlay ]<br><br>
-            Match your Pulse with 'Glitch Obstacles' to blast them.<br>
-            Avoid solid walls. Speed scales with the Techno Rhythm!
+            [ KEYBOARD: Left/Right Arrows | Spacebar = Pulse ]<br>
+            [ MOBILE: Adjustable Screen Buttons Layout ]<br><br>
+            Destroy 'Glitch Diamonds' with your energy pulse.<br>
+            Dodge vector walls. Speed auto-scales with rhythm!
         </div>
         <button id="startBtn">INITIALIZE PROTOCOL</button>
     </div>
 
-    <!-- On-screen controls for mobile testing -->
     <div id="mobileControls">
         <div class="btn" id="leftBtn">←</div>
         <div class="btn" id="pulseBtn">PULSE</div>
@@ -156,16 +256,16 @@
 
 <script>
 /**
- * Neon Cyber-Pulse - Production Grade Core Engine
+ * Neon Cyber-Pulse v2.0 - Core Engine Implementation
  */
 
-// --- Audio Synthesizer Class (Procedural Audio Engine) ---
 class AudioEngine {
     constructor() {
         this.ctx = null;
         this.bpm = 125;
         this.beatInterval = 60 / this.bpm;
         this.nextBeatTime = 0;
+        this.enabled = true;
     }
     init() {
         if (!this.ctx) {
@@ -173,117 +273,100 @@ class AudioEngine {
         }
     }
     playBeat(time) {
-        if (!this.ctx) return;
-        // Kick Drum Synthesizer
+        if (!this.ctx || !this.enabled) return;
         let osc = this.ctx.createOscillator();
         let gain = this.ctx.createGain();
         osc.connect(gain);
         gain.connect(this.ctx.destination);
-        
-        osc.frequency.setValueAtTime(120, time);
-        osc.frequency.exponentialRampToValueAtTime(0.01, time + 0.3);
-        
-        gain.gain.setValueAtTime(0.4, time);
-        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.3);
-        
+        osc.frequency.setValueAtTime(115, time);
+        osc.frequency.exponentialRampToValueAtTime(0.01, time + 0.25);
+        gain.gain.setValueAtTime(0.35, time);
+        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.25);
         osc.start(time);
-        osc.stop(time + 0.3);
+        osc.stop(time + 0.25);
 
-        // Retro Synth Offbeat Bassline
         let bassOsc = this.ctx.createOscillator();
         let bassGain = this.ctx.createGain();
         bassOsc.type = 'sawtooth';
         bassOsc.connect(bassGain);
         bassGain.connect(this.ctx.destination);
-
-        let notes = [55, 65.41, 73.42, 82.41]; // Cyber A, C, D, E frequencies
+        let notes = [50, 58, 65, 73];
         let currentNote = notes[Math.floor(Math.random() * notes.length)];
-        
-        bassOsc.frequency.setValueAtTime(currentNote, time + 0.15);
-        bassGain.gain.setValueAtTime(0.15, time + 0.15);
-        bassGain.gain.exponentialRampToValueAtTime(0.01, time + 0.3);
-        
-        bassOsc.start(time + 0.15);
-        bassOsc.stop(time + 0.3);
+        bassOsc.frequency.setValueAtTime(currentNote, time + 0.12);
+        bassGain.gain.setValueAtTime(0.12, time + 0.12);
+        bassGain.gain.exponentialRampToValueAtTime(0.01, time + 0.25);
+        bassOsc.start(time + 0.12);
+        bassOsc.stop(time + 0.25);
     }
     playPulseFx() {
-        if (!this.ctx) return;
+        if (!this.ctx || !this.enabled) return;
         let osc = this.ctx.createOscillator();
         let gain = this.ctx.createGain();
         osc.type = 'triangle';
         osc.connect(gain);
         gain.connect(this.ctx.destination);
-        
-        osc.frequency.setValueAtTime(150, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.2);
-        
-        gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
-        
+        osc.frequency.setValueAtTime(160, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(900, this.ctx.currentTime + 0.18);
+        gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.18);
         osc.start();
-        osc.stop(this.ctx.currentTime + 0.2);
+        osc.stop(this.ctx.currentTime + 0.18);
     }
     playExplosionFx() {
-        if (!this.ctx) return;
+        if (!this.ctx || !this.enabled) return;
         let osc = this.ctx.createOscillator();
         let gain = this.ctx.createGain();
         osc.type = 'sawtooth';
         osc.connect(gain);
         gain.connect(this.ctx.destination);
-        
-        osc.frequency.setValueAtTime(300, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.4);
-        
-        gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.4);
-        
+        osc.frequency.setValueAtTime(260, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.35);
+        gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.35);
         osc.start();
-        osc.stop(this.ctx.currentTime + 0.4);
+        osc.stop(this.ctx.currentTime + 0.35);
     }
-    scheduler(gameTime) {
-        if (!this.ctx) return;
+    scheduler() {
+        if (!this.ctx || !this.enabled) return;
         while (this.nextBeatTime < this.ctx.currentTime + 0.1) {
             this.playBeat(this.nextBeatTime);
             this.nextBeatTime += this.beatInterval;
-            // Trigger sync visual cue inside game engine
             window.gameEngine.onBeatTrigger();
         }
     }
 }
 
-// --- Main Game Engine ---
 class CyberEngine {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.audio = new AudioEngine();
         
-        // Settings & Dimensions
         this.resizeCanvas();
         this.lanesCount = 3;
         this.laneWidth = this.canvas.width / this.lanesCount;
         
-        // Game States
         this.isRunning = false;
+        this.isPaused = false;
         this.score = 0;
         this.highScore = localStorage.getItem('cyber_highscore') || 0;
-        this.speed = 400; // Base speed px/sec
-        this.maxSpeed = 1200;
+        this.speed = 400; 
+        this.maxSpeed = 1300;
         this.level = 1;
         this.themeColor = '#00f0ff';
         this.pulseColor = '#ff0055';
         
-        // Player Config
         this.player = {
-            lane: 1, // Start middle
+            lane: 1, 
             targetX: 0,
             currentX: 0,
             y: 0,
-            width: 40,
-            height: 40,
+            width: 55,
+            height: 38,
+            tilt: 0, 
             pulseActive: false,
             pulseRadius: 0,
-            maxPulseRadius: 150
+            maxPulseRadius: 160
         };
         
         this.obstacles = [];
@@ -293,17 +376,17 @@ class CyberEngine {
         this.beatPulseScale = 1;
 
         window.addEventListener('resize', () => this.resizeCanvas());
-        this.initInput();
+        this.initInputHooks();
+        this.initSettingsPanel();
     }
 
     resizeCanvas() {
         const targetWidth = Math.min(window.innerWidth, 600);
-        const targetHeight = window.innerHeight;
         this.canvas.width = targetWidth;
-        this.canvas.height = targetHeight;
+        this.canvas.height = window.innerHeight;
         this.laneWidth = this.canvas.width / 3;
         if (this.player) {
-            this.player.y = this.canvas.height - 150;
+            this.player.y = this.canvas.height - 160;
             this.updatePlayerLaneInstant();
         }
     }
@@ -313,10 +396,9 @@ class CyberEngine {
         this.player.currentX = this.player.targetX;
     }
 
-    initInput() {
-        // Desktop Inputs
+    initInputHooks() {
         window.addEventListener('keydown', (e) => {
-            if (!this.isRunning) return;
+            if (!this.isRunning || this.isPaused) return;
             if (e.key === 'ArrowLeft' && this.player.lane > 0) {
                 this.player.lane--;
             } else if (e.key === 'ArrowRight' && this.player.lane < 2) {
@@ -327,20 +409,54 @@ class CyberEngine {
             this.player.targetX = this.player.lane * this.laneWidth + this.laneWidth / 2;
         });
 
-        // Mobile Screen Overlay Inputs
-        document.getElementById('leftBtn').addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if (this.player.lane > 0) this.player.lane--;
-            this.player.targetX = this.player.lane * this.laneWidth + this.laneWidth / 2;
+        const leftHandler = (e) => { e.preventDefault(); if (this.isRunning && !this.isPaused && this.player.lane > 0) this.player.lane--; this.refreshTarget(); };
+        const rightHandler = (e) => { e.preventDefault(); if (this.isRunning && !this.isPaused && this.player.lane < 2) this.player.lane++; this.refreshTarget(); };
+        
+        document.getElementById('leftBtn').addEventListener('touchstart', leftHandler);
+        document.getElementById('rightBtn').addEventListener('touchstart', rightHandler);
+        document.getElementById('pulseBtn').addEventListener('touchstart', (e) => { e.preventDefault(); if(this.isRunning && !this.isPaused) this.triggerPulse(); });
+    }
+
+    refreshTarget() {
+        this.player.targetX = this.player.lane * this.laneWidth + this.laneWidth / 2;
+    }
+
+    initSettingsPanel() {
+        const panel = document.getElementById('settingsPanel');
+        const icon = document.getElementById('settingsIcon');
+        const closeBtn = document.getElementById('closeSettingsBtn');
+        const slider = document.getElementById('btnSizeSlider');
+        const sizeVal = document.getElementById('sizeVal');
+        const audioChk = document.getElementById('audioToggle');
+
+        icon.addEventListener('click', () => {
+            if (!this.isRunning) return;
+            this.isPaused = true;
+            panel.style.display = 'flex';
         });
-        document.getElementById('rightBtn').addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if (this.player.lane < 2) this.player.lane++;
-            this.player.targetX = this.player.lane * this.laneWidth + this.laneWidth / 2;
+
+        closeBtn.addEventListener('click', () => {
+            this.isPaused = false;
+            panel.style.display = 'none';
+            this.lastTime = performance.now(); 
+            if(this.isRunning) requestAnimationFrame((time) => this.loop(time));
         });
-        document.getElementById('pulseBtn').addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            this.triggerPulse();
+
+        slider.addEventListener('input', (e) => {
+            const val = e.target.value;
+            sizeVal.innerText = val + 'px';
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.style.width = val + 'px';
+                btn.style.height = val + 'px';
+                if(btn.id === 'pulseBtn') {
+                    btn.style.width = (parseInt(val) + 10) + 'px';
+                    btn.style.height = (parseInt(val) + 10) + 'px';
+                }
+            });
+        });
+
+        audioChk.addEventListener('change', (e) => {
+            this.audio.enabled = e.target.checked;
         });
     }
 
@@ -353,31 +469,30 @@ class CyberEngine {
     }
 
     onBeatTrigger() {
-        this.beatPulseScale = 1.25; // Beat impact visual effect
+        this.beatPulseScale = 1.3;
     }
 
     spawnObstacle() {
-        const types = ['SOLID', 'GLITCH']; // SOLID = Avoid, GLITCH = Destroyable via Pulse
-        const randomType = types[Math.floor(Math.random() * types.length)];
-        const randomLane = Math.floor(Math.random() * this.lanesCount);
+        const types = ['SOLID', 'GLITCH'];
+        const type = types[Math.floor(Math.random() * types.length)];
+        const lane = Math.floor(Math.random() * this.lanesCount);
 
         this.obstacles.push({
-            lane: randomLane,
-            x: randomLane * this.laneWidth + this.laneWidth / 2,
-            y: -50,
-            size: 30,
-            type: randomType,
-            color: randomType === 'SOLID' ? this.themeColor : this.pulseColor
+            lane: lane,
+            x: lane * this.laneWidth + this.laneWidth / 2,
+            y: -60,
+            size: 28,
+            type: type,
+            color: type === 'SOLID' ? this.themeColor : this.pulseColor
         });
     }
 
     spawnExplosionParticles(x, y, color) {
-        for (let i = 0; i < 15; i++) {
+        for (let i = 0; i < 16; i++) {
             this.particles.push({
-                x: x,
-                y: y,
-                vx: (Math.random() - 0.5) * 400,
-                vy: (Math.random() - 0.5) * 400,
+                x: x, y: y,
+                vx: (Math.random() - 0.5) * 450,
+                vy: (Math.random() - 0.5) * 450,
                 alpha: 1,
                 size: Math.random() * 4 + 2,
                 color: color
@@ -394,6 +509,7 @@ class CyberEngine {
         this.particles = [];
         this.player.lane = 1;
         this.updatePlayerLaneInstant();
+        this.isPaused = false;
         this.isRunning = true;
     }
 
@@ -403,101 +519,83 @@ class CyberEngine {
             this.highScore = this.score;
             localStorage.setItem('cyber_highscore', this.highScore);
         }
-        document.getElementById('uiTitle').innerText = "SYSTEM CRASHED";
+        document.getElementById('uiTitle').innerText = "SYSTEM INTRUSION";
         document.getElementById('uiTitle').style.color = "#ff0055";
-        document.getElementById('uiInstructions').innerHTML = `CORE SCORE: ${this.score}<br>LOCAL HIGHSCORE: ${this.highScore}<br><br>Re-initialize terminal connection to try again.`;
-        document.getElementById('startBtn').innerText = "REBOOT MATRIX";
+        document.getElementById('uiInstructions').innerHTML = `INTEGRITY SCORE: ${this.score}<br>TERMINAL HIGH: ${this.highScore}<br><br>Re-verify credentials to load circuit.`;
+        document.getElementById('startBtn').innerText = "REBOOT FRAME";
         document.getElementById('uiOverlay').classList.remove('hide');
     }
 
     updateEngine(dt) {
-        // Audio processing rhythm sync scheduler
-        if (this.audio.ctx) {
+        if (this.isPaused) return;
+
+        if (this.audio.ctx && this.audio.enabled) {
             this.audio.scheduler();
         }
 
-        // Handle beat bounce decay
-        if (this.beatPulseScale > 1) {
-            this.beatPulseScale -= dt * 2;
-        } else {
-            this.beatPulseScale = 1;
-        }
+        if (this.beatPulseScale > 1) this.beatPulseScale -= dt * 2.5;
+        else this.beatPulseScale = 1;
 
-        // Level scaling based on difficulty optimization
-        this.speed = Math.min(400 + (this.score * 8), this.maxSpeed);
-        if (this.score > 20 && this.level === 1) { this.level = 2; this.themeColor = '#bc00ff'; }
-        if (this.score > 50 && this.level === 2) { this.level = 3; this.themeColor = '#39ff14'; }
+        this.speed = Math.min(420 + (this.score * 9), this.maxSpeed);
+        if (this.score > 25 && this.level === 1) { this.level = 2; this.themeColor = '#bd00ff'; }
+        if (this.score > 60 && this.level === 2) { this.level = 3; this.themeColor = '#00ff66'; }
 
-        // Smooth player lane interpolation
-        this.player.currentX += (this.player.targetX - this.player.currentX) * 18 * dt;
+        let lastX = this.player.currentX;
+        this.player.currentX += (this.player.targetX - this.player.currentX) * 16 * dt;
+        
+        let horizontalSpeed = this.player.currentX - lastX;
+        this.player.tilt = horizontalSpeed * 0.04; 
 
-        // Player Sonic Pulse Processing
         if (this.player.pulseActive) {
-            this.player.pulseRadius += dt * 600;
+            this.player.pulseRadius += dt * 650;
             if (this.player.pulseRadius >= this.player.maxPulseRadius) {
                 this.player.pulseActive = false;
-                this.player.pulseRadius = 0;
             }
         }
 
-        // Spawning cycle
         this.spawnTimer += dt;
-        let dynamicSpawnRate = Math.max(1.5 - (this.speed / 800), 0.5);
-        if (this.spawnTimer >= dynamicSpawnRate) {
+        let spawnInterval = Math.max(1.4 - (this.speed / 850), 0.45);
+        if (this.spawnTimer >= spawnInterval) {
             this.spawnObstacle();
             this.spawnTimer = 0;
         }
 
-        // Update Particles
         for (let i = this.particles.length - 1; i >= 0; i--) {
             let p = this.particles[i];
             p.x += p.vx * dt;
             p.y += p.vy * dt;
-            p.alpha -= dt * 1.5;
+            p.alpha -= dt * 1.6;
             if (p.alpha <= 0) this.particles.splice(i, 1);
         }
 
-        // Update Obstacles & Collision Matrix
         for (let i = this.obstacles.length - 1; i >= 0; i--) {
             let obs = this.obstacles[i];
             obs.y += this.speed * dt;
 
-            // 1. Sonic Pulse Wave Hit Detection (Glitch Items destruction)
             if (this.player.pulseActive && obs.type === 'GLITCH') {
                 let dx = obs.x - this.player.currentX;
                 let dy = obs.y - this.player.y;
-                let distance = Math.sqrt(dx * dx + dy * dy);
-                if (distance <= this.player.pulseRadius) {
+                if (Math.sqrt(dx*dx + dy*dy) <= this.player.pulseRadius) {
                     this.spawnExplosionParticles(obs.x, obs.y, obs.color);
                     this.audio.playExplosionFx();
                     this.obstacles.splice(i, 1);
-                    this.score += 2;
+                    this.score += 3;
                     continue;
                 }
             }
 
-            // 2. Direct Body Collision Detection
-            let pDx = Math.abs(obs.x - this.player.currentX);
-            let pDy = Math.abs(obs.y - this.player.y);
-            if (pDx < (this.player.width/2 + obs.size/2) && pDy < (this.player.height/2 + obs.size/2)) {
-                if (obs.type === 'SOLID') {
-                    this.spawnExplosionParticles(this.player.currentX, this.player.y, '#ffffff');
-                    this.audio.playExplosionFx();
-                    this.gameOver();
-                    return;
-                } else {
-                    // Punished for running straight into a raw glitch without pulse protection
-                    this.spawnExplosionParticles(obs.x, obs.y, obs.color);
-                    this.audio.playExplosionFx();
-                    this.gameOver();
-                    return;
-                }
+            let boxX = Math.abs(obs.x - this.player.currentX);
+            let boxY = Math.abs(obs.y - this.player.y);
+            if (boxX < (this.player.width/2 + obs.size/1.8) && boxY < (this.player.height/2 + obs.size/1.8)) {
+                this.spawnExplosionParticles(this.player.currentX, this.player.y, '#ffffff');
+                this.audio.playExplosionFx();
+                this.gameOver();
+                return;
             }
 
-            // Clean processing for out of screen assets
-            if (obs.y > this.canvas.height + 50) {
+            if (obs.y > this.canvas.height + 60) {
                 this.obstacles.splice(i, 1);
-                this.score++; // Score award for successful dodging
+                this.score++;
             }
         }
     }
@@ -505,8 +603,7 @@ class CyberEngine {
     renderEngine() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Draw Ambient Scrolling Wireframes (3 Lanes Grid Layout)
-        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.025)';
         this.ctx.lineWidth = 2;
         for (let i = 1; i < this.lanesCount; i++) {
             this.ctx.beginPath();
@@ -515,46 +612,43 @@ class CyberEngine {
             this.ctx.stroke();
         }
 
-        // Render Dynamic Pulse Shockwave Vector
         if (this.player.pulseActive) {
             this.ctx.save();
-            this.ctx.shadowBlur = 20;
+            this.ctx.shadowBlur = 22;
             this.ctx.shadowColor = this.pulseColor;
             this.ctx.strokeStyle = this.pulseColor;
-            this.ctx.lineWidth = 4 * (1 - this.player.pulseRadius / this.player.maxPulseRadius);
+            this.ctx.lineWidth = 5 * (1 - this.player.pulseRadius / this.player.maxPulseRadius);
             this.ctx.beginPath();
             this.ctx.arc(this.player.currentX, this.player.y, this.player.pulseRadius, 0, Math.PI * 2);
             this.ctx.stroke();
             this.ctx.restore();
         }
 
-        // Render Obstacles 
         this.obstacles.forEach(obs => {
             this.ctx.save();
-            this.ctx.shadowBlur = 15 * this.beatPulseScale;
+            this.ctx.shadowBlur = 16 * this.beatPulseScale;
             this.ctx.shadowColor = obs.color;
             this.ctx.fillStyle = obs.color;
 
             if (obs.type === 'SOLID') {
-                // High-tech Neon Triangular Wall Structure
                 this.ctx.beginPath();
                 this.ctx.moveTo(obs.x, obs.y - obs.size);
                 this.ctx.lineTo(obs.x - obs.size, obs.y + obs.size);
                 this.ctx.lineTo(obs.x + obs.size, obs.y + obs.size);
-                this.closeAndFill();
+                this.ctx.closePath();
+                this.ctx.fill();
             } else {
-                // Glitch Artifact Matrix (Diamond Shape)
                 this.ctx.beginPath();
                 this.ctx.moveTo(obs.x, obs.y - obs.size);
                 this.ctx.lineTo(obs.x + obs.size, obs.y);
                 this.ctx.lineTo(obs.x, obs.y + obs.size);
                 this.ctx.lineTo(obs.x - obs.size, obs.y);
-                this.closeAndFill();
+                this.ctx.closePath();
+                this.ctx.fill();
             }
             this.ctx.restore();
         });
 
-        // Render Particles System
         this.particles.forEach(p => {
             this.ctx.save();
             this.ctx.globalAlpha = p.alpha;
@@ -563,50 +657,60 @@ class CyberEngine {
             this.ctx.restore();
         });
 
-        // Render Hero Ship/Bike Structure
         this.ctx.save();
+        this.ctx.translate(this.player.currentX, this.player.y);
+        this.ctx.rotate(this.player.tilt); 
         this.ctx.shadowBlur = 25 * this.beatPulseScale;
         this.ctx.shadowColor = this.themeColor;
-        this.ctx.fillStyle = '#ffffff';
         this.ctx.strokeStyle = this.themeColor;
         this.ctx.lineWidth = 3;
-        
-        // Custom Sci-Fi Vector Craft Design
+
+        let w = this.player.width / 2;
+        let h = this.player.height / 2;
+
+        this.ctx.fillStyle = '#0a0518';
         this.ctx.beginPath();
-        this.ctx.moveTo(this.player.currentX, this.player.y - this.player.height/2);
-        this.ctx.lineTo(this.player.currentX - this.player.width/2, this.player.y + this.player.height/2);
-        this.ctx.lineTo(this.player.currentX, this.player.y + this.player.height/4);
-        this.ctx.lineTo(this.player.currentX + this.player.width/2, this.player.y + this.player.height/2);
+        this.ctx.moveTo(-w + 8, -h);     
+        this.ctx.lineTo(w - 8, -h);      
+        this.ctx.lineTo(w, -h + 12);     
+        this.ctx.lineTo(w - 4, h - 8);   
+        this.ctx.lineTo(w + 6, h);       
+        this.ctx.lineTo(-w - 6, h);      
+        this.ctx.lineTo(-w + 4, h - 8);  
+        this.ctx.lineTo(-w, -h + 12);    
         this.ctx.closePath();
         this.ctx.fill();
         this.ctx.stroke();
-        this.ctx.restore();
 
-        // Heads Up Dashboard (UI text rendering)
         this.ctx.fillStyle = '#ffffff';
-        this.ctx.font = "bold 16px 'Courier New'";
-        this.ctx.fillText(`CORE CORE: ${this.score}`, 20, 40);
-        this.ctx.fillStyle = this.themeColor;
-        this.ctx.fillText(`MATRIX SEC: ${this.level}`, 20, 65);
-        this.ctx.fillStyle = '#ff0055';
-        this.ctx.fillText(`HZ VELOCITY: ${Math.floor(this.speed)}`, 20, 90);
-    }
-
-    closeAndFill() {
+        this.ctx.beginPath();
+        this.ctx.moveTo(-w + 14, -h + 14);
+        this.ctx.lineTo(w - 14, -h + 14);
+        this.ctx.lineTo(w - 18, 0);
+        this.ctx.lineTo(-w + 18, 0);
         this.ctx.closePath();
         this.ctx.fill();
+        this.ctx.stroke();
+
+        this.ctx.restore();
+
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.font = "bold 16px 'Courier New'";
+        this.ctx.fillText(`PULSE SCORE: ${this.score}`, 20, 40);
+        this.ctx.fillStyle = this.themeColor;
+        this.ctx.fillText(`LEVEL STEP: ${this.level}`, 20, 65);
+        this.ctx.fillStyle = '#ff0055';
+        this.ctx.fillText(`HZ CLOCK  : ${Math.floor(this.speed)}`, 20, 90);
     }
 
     loop(currentTime) {
-        if (!this.isRunning) return;
+        if (!this.isRunning || this.isPaused) return;
         
-        // High Performance Delta Time Tracking
         if (!this.lastTime) this.lastTime = currentTime;
         let dt = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
 
-        // Cap performance frame drop spikes
-        if (dt > 0.1) dt = 0.1;
+        if (dt > 0.1) dt = 0.1; 
 
         this.updateEngine(dt);
         this.renderEngine();
@@ -615,18 +719,16 @@ class CyberEngine {
     }
 }
 
-// Initialization Triggers
 window.gameEngine = new CyberEngine();
 
 document.getElementById('startBtn').addEventListener('click', () => {
     window.gameEngine.audio.init();
     document.getElementById('uiOverlay').classList.add('hide');
     window.gameEngine.resetGame();
-    window.gameEngine.lastTime = 0;
+    window.gameEngine.lastTime = performance.now();
     requestAnimationFrame((time) => window.gameEngine.loop(time));
 });
 </script>
 
 </body>
 </html>
-
