@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape">
-    <title>F1 TURBO X - Cyberpunk Racing</title>
+    <title>F1 TURBO X - 3D Cockpit Edition</title>
     <style>
         * {
             margin: 0;
@@ -16,8 +16,8 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: #05050a;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #030307;
+            font-family: 'Segoe UI', Roboto, sans-serif;
             color: #fff;
         }
         #game-container {
@@ -30,8 +30,9 @@
         }
         canvas {
             display: block;
-            background: #0a0a14;
-            box-shadow: 0 0 20px rgba(0, 255, 242, 0.2);
+            width: 100%;
+            height: 100%;
+            background: #000;
         }
         .screen {
             position: absolute;
@@ -39,161 +40,128 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(5, 5, 10, 0.9);
+            background: rgba(4, 4, 8, 0.95);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 10;
-            transition: opacity 0.3s ease;
         }
-        .hidden {
-            display: none !important;
-            opacity: 0;
-        }
+        .hidden { display: none !important; }
         h1 {
-            font-size: 3.5rem;
+            font-size: 3.2rem;
             text-transform: uppercase;
-            letter-spacing: 4px;
-            margin-bottom: 20px;
+            letter-spacing: 5px;
+            margin-bottom: 15px;
             color: #00fff2;
-            text-shadow: 0 0 15px rgba(0, 255, 242, 0.6), 0 0 30px rgba(255, 0, 127, 0.3);
+            text-shadow: 0 0 15px rgba(0, 255, 242, 0.6), 0 0 30px rgba(255, 0, 127, 0.4);
             font-style: italic;
+            font-weight: 900;
         }
         .panel {
-            background: rgba(15, 15, 30, 0.85);
+            background: rgba(12, 12, 24, 0.9);
             border: 2px solid #ff007f;
-            border-radius: 12px;
-            padding: 25px;
-            width: 80%;
-            max-width: 700px;
-            box-shadow: 0 0 25px rgba(255, 0, 127, 0.2);
+            border-radius: 14px;
+            padding: 20px;
+            width: 85%;
+            max-width: 680px;
+            box-shadow: 0 0 30px rgba(255, 0, 127, 0.3);
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 15px;
         }
-        .full-width {
-            grid-column: span 2;
-        }
-        .setting-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        label {
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            color: #8f93b5;
-            letter-spacing: 1px;
-        }
+        .full-width { grid-column: span 2; }
+        .setting-group { display: flex; flex-direction: column; gap: 5px; }
+        label { font-size: 0.85rem; text-transform: uppercase; color: #8f93b5; letter-spacing: 1px; }
         select, button {
-            background: #121225;
+            background: #090914;
             border: 1px solid #00fff2;
             color: #fff;
-            padding: 10px 15px;
-            font-size: 1rem;
+            padding: 10px;
+            font-size: 0.95rem;
             border-radius: 6px;
             cursor: pointer;
-            outline: none;
             transition: all 0.2s ease;
         }
         select:focus, button:hover {
             background: #00fff2;
             color: #05050a;
-            box-shadow: 0 0 12px rgba(0, 255, 242, 0.5);
+            box-shadow: 0 0 10px rgba(0, 255, 242, 0.5);
         }
-        .btn-prime {
-            background: #ff007f;
-            border: none;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 1.2rem;
-            margin-top: 10px;
-        }
-        .btn-prime:hover {
-            background: #fff;
-            color: #ff007f;
-            box-shadow: 0 0 15px #fff;
-        }
-        /* HUD Layout */
+        .btn-prime { background: #ff007f; border: none; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+        .btn-prime:hover { background: #fff; color: #ff007f; box-shadow: 0 0 15px #fff; }
+        
+        /* Heads Up Display (HUD) */
         #hud {
             position: absolute;
-            top: 15px;
-            left: 15px;
-            right: 15px;
+            top: 12px;
+            left: 12px;
+            right: 12px;
             display: flex;
             justify-content: space-between;
             pointer-events: none;
             z-index: 5;
         }
         .hud-card {
-            background: rgba(10, 10, 20, 0.7);
-            padding: 10px 20px;
-            border-left: 4px solid #00fff2;
-            border-radius: 0 8px 8px 0;
-            font-size: 1.1rem;
+            background: rgba(5, 5, 10, 0.75);
+            padding: 8px 16px;
+            border-bottom: 3px solid #ff007f;
+            border-radius: 4px;
+            font-size: 1.05rem;
             font-weight: bold;
-            text-shadow: 0 0 5px #00fff2;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px #ff007f;
         }
         #btn-settings-trigger {
             position: absolute;
-            top: 15px;
-            right: 15px;
+            top: 12px;
+            right: 12px;
             z-index: 6;
             background: rgba(10, 10, 20, 0.8);
-            border: 1px solid #ff007f;
+            border: 1px solid #00fff2;
             border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.3rem;
-            pointer-events: auto;
+            width: 42px;
+            height: 42px;
+            font-size: 1.1rem;
+            cursor: pointer;
         }
-        /* Mobile Touch Controls Overlay */
+
+        /* Input Controls Interface Overlay */
         #touch-overlay {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 150px;
+            height: 100%;
             z-index: 4;
             display: none;
             justify-content: space-between;
-            padding: 20px 40px;
+            align-items: flex-end;
+            padding: 25px 40px;
             pointer-events: none;
         }
         .ctrl-btn {
-            width: 90px;
-            height: 90px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(0, 255, 242, 0.4);
+            width: 85px;
+            height: 85px;
+            background: rgba(5, 5, 10, 0.6);
+            border: 2px solid rgba(0, 255, 242, 0.5);
             border-radius: 50%;
             pointer-events: auto;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 2rem;
-            color: rgba(0, 255, 242, 0.6);
+            font-size: 1.8rem;
+            color: #00fff2;
+            box-shadow: 0 0 10px rgba(0, 255, 242, 0.2);
         }
-        .ctrl-btn:active {
-            background: rgba(0, 255, 242, 0.3);
-            border-color: #00fff2;
-            color: #fff;
-        }
-        .ctrl-group {
-            display: flex;
-            gap: 20px;
-            pointer-events: none;
-        }
+        .ctrl-btn:active { background: rgba(0, 255, 242, 0.3); color: #fff; border-color: #fff; }
+        .ctrl-group { display: flex; gap: 20px; pointer-events: none; }
         #countdown {
             position: absolute;
-            font-size: 8rem;
+            font-size: 7.5rem;
             font-weight: 900;
-            color: #ff007f;
-            text-shadow: 0 0 30px #ff007f;
+            color: #00fff2;
+            text-shadow: 0 0 25px #00fff2;
             z-index: 3;
             font-style: italic;
             display: none;
@@ -204,66 +172,63 @@
 
 <div id="game-container">
     <div id="menu-screen" class="screen">
-        <h1>F1 Turbo X</h1>
+        <h1>F1 TURBO X : 3D</h1>
         <div class="panel">
             <div class="setting-group">
-                <label>Select Car Type</label>
+                <label>F1 Chassis Preset</label>
                 <select id="select-car">
-                    <option value="SPEED">SPEEDSTER (High Top Speed)</option>
-                    <option value="TURBO">TURBO X (Fast Acceleration)</option>
-                    <option value="GRIP">APEX GRIP (Better Handling)</option>
-                    <option value="DRIFT">NEON DRIFT (Controlled Sliding)</option>
+                    <option value="SPEED">V10 SPEEDSTER (Top Speed)</option>
+                    <option value="TURBO">TURBO CHARGED (Acceleration)</option>
+                    <option value="GRIP">APEX MAGNET (Cornering Grip)</option>
                 </select>
             </div>
             <div class="setting-group">
-                <label>Total Opponents</label>
+                <label>Grid Competitors</label>
                 <select id="select-ai">
-                    <option value="1">1 AI Car</option>
-                    <option value="2">2 AI Cars</option>
-                    <option value="3" selected>3 AI Cars</option>
-                    <option value="4">4 AI Cars</option>
-                    <option value="5">5 AI Cars</option>
+                    <option value="1">1 Opponent</option>
+                    <option value="3" selected>3 Opponents</option>
+                    <option value="5">5 Opponents</option>
                 </select>
             </div>
             <div class="setting-group">
-                <label>Control Scheme</label>
+                <label>Input Control Mapping</label>
                 <select id="select-controls">
-                    <option value="TOUCH">Touch D-Pad Buttons</option>
-                    <option value="TILT">Device Tilt (Gyro)</option>
-                    <option value="SWIPE">Swipe Gestures</option>
+                    <option value="TOUCH">Touch Interface D-Pad</option>
+                    <option value="TILT">Device Tilt (Gyroscope)</option>
+                    <option value="SWIPE">Horizontal Swiping</option>
                 </select>
             </div>
             <div class="setting-group">
-                <label>AI Tactics</label>
+                <label>Grid AI Sub-System</label>
                 <select id="select-aggression">
-                    <option value="OFF">Normal Racing (Clean)</option>
-                    <option value="ON">Aggressive Mode (Blocks & Hits)</option>
+                    <option value="OFF">Standard Racing Lines</option>
+                    <option value="ON">Aggressive Block & Ram</option>
                 </select>
             </div>
-            <button id="btn-start" class="btn-prime full-width">Launch Race</button>
+            <button id="btn-start" class="btn-prime full-width">Start Grand Prix</button>
         </div>
     </div>
 
     <div id="settings-modal" class="screen hidden">
-        <h1>Settings Menu</h1>
+        <h1>System Override</h1>
         <div class="panel">
             <div class="setting-group full-width">
-                <label>Change Control Scheme Dynamically</label>
+                <label>On-the-fly Controls Switch</label>
                 <select id="runtime-controls">
-                    <option value="TOUCH">Touch D-Pad Buttons</option>
-                    <option value="TILT">Device Tilt (Gyro)</option>
-                    <option value="SWIPE">Swipe Gestures</option>
+                    <option value="TOUCH">Touch Interface D-Pad</option>
+                    <option value="TILT">Device Tilt (Gyroscope)</option>
+                    <option value="SWIPE">Horizontal Swiping</option>
                 </select>
             </div>
             <div class="setting-group full-width">
-                <label>AI Behavioral Tactics</label>
+                <label>AI Tactics Adjuster</label>
                 <select id="runtime-aggression">
-                    <option value="OFF">Normal Racing</option>
-                    <option value="ON">Aggressive Mode</option>
+                    <option value="OFF">Standard Racing Lines</option>
+                    <option value="ON">Aggressive Block & Ram</option>
                 </select>
             </div>
             <button id="btn-resume" class="btn-prime">Resume Race</button>
-            <button id="btn-restart" class="btn-prime" style="background:#4e122b; border:1px solid #ff007f;">Quit to Menu</button>
+            <button id="btn-restart" class="btn-prime" style="background:#310a1b; border-color:#ff007f;">Abort to Main Menu</button>
         </div>
     </div>
 
@@ -272,8 +237,10 @@
         <div class="hud-card" id="hud-pos">POS: 1 / 4</div>
         <div class="hud-card" id="hud-lap">LAP: 1 / 3</div>
         <div class="hud-card" id="hud-speed">0 KM/H</div>
-        <div class="hud-card" id="hud-coins">COINS: 0</div>
+        <div class="hud-card" id="hud-coins">CREDITS: 0</div>
     </div>
+
+    <button id="camera-toggle" class="hidden" style="position: absolute; top: 12px; left: 12px; z-index: 6; background: rgba(10,10,20,0.8); border: 1px solid #ff007f; color: #fff; padding: 8px 12px; border-radius: 4px; font-weight: bold; font-size: 0.8rem;">CAMERA: COCKPIT</button>
 
     <div id="countdown">3</div>
 
@@ -293,619 +260,529 @@
 
 <script>
 /**
- * F1 TURBO X - HIGH PERFORMANCE CANVAS CORE
+ * F1 TURBO X - ADVANCED PERSPECTIVE 3D RENDER ENGINE
  */
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// Game Engine State Variables
-let gameState = 'MENU'; 
-let currentLevel = 1;
-let totalLaps = 3;
-let coinsCollected = 0;
-let countdownVal = 3;
+let gameState = 'MENU';
 let isControllable = false;
+let currentCameraMode = 'COCKPIT'; // Alternate: 'BUMPER'
 
-// System Setup & Configuration
-let config = {
-    carType: 'SPEED',
-    aiCount: 3,
-    controlScheme: 'TOUCH',
-    aiAggressive: 'OFF'
-};
-
-// Car Stats Configurations
-const CAR_PRESETS = {
-    SPEED: { topSpeed: 7.5, accel: 0.08, handling: 0.04, drift: 0.98 },
-    TURBO: { topSpeed: 6.8, accel: 0.14, handling: 0.045, drift: 0.97 },
-    GRIP:  { topSpeed: 6.5, accel: 0.09, handling: 0.065, drift: 0.99 },
-    DRIFT: { topSpeed: 7.0, accel: 0.07, handling: 0.05, drift: 0.92 }
-};
-
-// Input Trackers
+// System Configurations State
+let config = { carType: 'SPEED', aiCount: 3, controlScheme: 'TOUCH', aiAggressive: 'OFF' };
 let inputs = { left: false, right: false, gas: false, brake: false };
-let tiltAngle = 0;
-let touchStartX = 0, touchStartY = 0;
+let tiltX = 0, touchStartX = 0;
 
-// Setup Adaptive Viewport
-function resizeCanvas() {
+// Game Tracking Diagnostics
+let playerProgress = 0; 
+let playerX = 0; // Displacement relative to center of road (-1 to 1)
+let playerSpeed = 0;
+let maxSpeed = 240;
+let playerLap = 1;
+let totalLaps = 3;
+let internalCredits = 0;
+let trackLength = 0;
+
+let opponents = [];
+let roadSegments = [];
+let mapWaypoints = []; // Dynamic nodes vector for custom scalable map
+let screenWidth = 1024;
+let screenHeight = 768;
+
+function resizeViewport() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    screenWidth = canvas.width;
+    screenHeight = canvas.height;
 }
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
+window.addEventListener('resize', resizeViewport);
+resizeViewport();
 
 /**
- * MATH VECTOR MATH & GENERATIVE TRACK MAPS
+ * MATHEMATICAL PERSPECTIVE SEGMENT PATTERNS (DESIGNED SHAPE LINES)
  */
-const TRACKS = {
-    1: { // Level 1 Track Definition
-        width: 140,
-        points: [
-            {x: 150, y: 150}, {x: 750, y: 150}, {x: 900, y: 300},
-            {x: 900, y: 600}, {x: 650, y: 750}, {x: 350, y: 500},
-            {x: 150, y: 650}
-        ]
-    },
-    2: { // Level 2 Track Definition (More Tighter Corners)
-        width: 110,
-        points: [
-            {x: 100, y: 100}, {x: 500, y: 100}, {x: 550, y: 350},
-            {x: 900, y: 200}, {x: 950, y: 650}, {x: 600, y: 700},
-            {x: 400, y: 450}, {x: 150, y: 600}
-        ]
-    }
-};
+function buildRaceTrack3D() {
+    roadSegments = [];
+    
+    // Track 1 Construction - Sharp Corner Blocks & Alternating Straights
+    addTrackSection(120, 0);       // Start/Finish Straight
+    addTrackSection(80, 0.03);    // Sweep Right
+    addTrackSection(60, -0.05);   // Sharp Left Apex Corner
+    addTrackSection(150, 0);      // High Speed Straightaway
+    addTrackSection(90, 0.06);     // Highly Compressed Hairpin Right
+    addTrackSection(100, -0.02);  // Light Left Transition
+    addTrackSection(110, 0);      // Return Stretch
+    
+    trackLength = roadSegments.length * 200; // Total linear distance scale
+    calculateMiniMapSkeleton();
+}
 
-// Global Instance Repositories
-let playerCar;
-let aiCars = [];
-let roadWaypoints = [];
-let coins = [];
-let powerups = [];
-let particles = [];
+function addTrackSection(numSegments, curveIntensity) {
+    for (let i = 0; i < numSegments; i++) {
+        // Distribute periodic coins or powerups onto random lanes
+        let asset = null;
+        if (i % 14 === 0 && Math.random() < 0.7) asset = { type: 'COIN', lane: (Math.random() * 1.4 - 0.7) };
+        else if (i % 38 === 0) asset = { type: Math.random() < 0.5 ? 'NITRO' : 'SHIELD', lane: (Math.random() * 1.2 - 0.6) };
 
-/**
- * ENTITY CLASS SCHEMATICS
- */
-class Car {
-    constructor(x, y, angle, isAI, type, index = 0) {
-        this.x = x;
-        this.y = y;
-        this.xVelocity = 0;
-        this.yVelocity = 0;
-        this.speed = 0;
-        this.angle = angle;
-        this.isAI = isAI;
-        this.type = type;
-        this.index = index; // AI tracking slot
-        
-        // Load operational statistics
-        let stats = CAR_PRESETS[type] || CAR_PRESETS.SPEED;
-        this.topSpeed = stats.topSpeed;
-        this.accel = stats.accel;
-        this.handling = stats.handling;
-        this.driftFactor = stats.drift;
-
-        // Functional Status Attributes
-        this.shieldActive = false;
-        this.magnetActive = false;
-        this.nitroTimer = 0;
-        this.currentLap = 1;
-        this.nextWaypointIndex = 1;
-        this.lapCooldown = 0;
-        this.color = isAI ? `hsl(${(index * 55) % 360}, 90%, 50%)` : '#00fff2';
-        
-        // Physical footprint dimensions
-        this.width = 36;
-        this.height = 18;
-    }
-
-    update() {
-        // Handle Powerup Expirations
-        if (this.nitroTimer > 0) this.nitroTimer--;
-        
-        let maxVel = this.nitroTimer > 0 ? this.topSpeed * 1.5 : this.topSpeed;
-
-        if (!this.isAI && isControllable) {
-            this.handlePlayerControls(maxVel);
-        } else if (this.isAI && isControllable) {
-            this.handleAIRacingLogic(maxVel);
-        }
-
-        // Apply Vector Friction & Velocity Physics
-        this.speed *= this.driftFactor;
-        if (Math.abs(this.speed) < 0.05) this.speed = 0;
-
-        this.x += Math.cos(this.angle) * this.speed;
-        this.y += Math.sin(this.angle) * this.speed;
-
-        // Process Dynamic Smoke Emissions
-        if (Math.abs(this.speed) > 3) {
-            createParticle(this.x - Math.cos(this.angle)*15, this.y - Math.sin(this.angle)*15, '#3a3a4f', 3);
-            if (this.nitroTimer > 0) {
-                createParticle(this.x - Math.cos(this.angle)*18, this.y - Math.sin(this.angle)*18, '#ff007f', 6);
-            }
-        }
-
-        // Keep Track Progress Tracking
-        this.trackRacePosition();
-    }
-
-    handlePlayerControls(maxVel) {
-        // Speed Processors
-        if (inputs.gas) {
-            this.speed = Math.min(this.speed + this.accel, maxVel);
-        } else if (inputs.brake) {
-            this.speed = Math.max(this.speed - this.accel * 1.5, -maxVel * 0.3);
-        } else {
-            this.speed *= 0.96;
-        }
-
-        // Steering Engine Switchboard
-        let turnSpeed = this.handling * (this.speed / this.topSpeed + 0.1);
-        if (config.controlScheme === 'TILT') {
-            this.angle += tiltAngle * 0.05;
-        } else {
-            if (inputs.left) this.angle -= turnSpeed;
-            if (inputs.right) this.angle += turnSpeed;
-        }
-    }
-
-    handleAIRacingLogic(maxVel) {
-        let target = roadWaypoints[this.nextWaypointIndex];
-        if (!target) return;
-
-        // Check if destination waypoint is reached
-        let dx = target.x - this.x;
-        let dy = target.y - this.y;
-        let dist = Math.hypot(dx, dy);
-
-        if (dist < 80) {
-            this.nextWaypointIndex = (this.nextWaypointIndex + 1) % roadWaypoints.length;
-        }
-
-        // Aggressive Blocking & Ramming Vector Overrides
-        if (config.aiAggressive === 'ON' && playerCar && Math.random() < 0.2) {
-            let pDist = Math.hypot(playerCar.x - this.x, playerCar.y - this.y);
-            if (pDist < 200) { // Override targeting directly onto player path
-                dx = playerCar.x - this.x;
-                dy = playerCar.y - this.y;
-            }
-        }
-
-        let targetAngle = Math.atan2(dy, dx);
-        let angleDiff = targetAngle - this.angle;
-
-        // Normalize Angle Ranges
-        while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
-        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
-
-        // AI Angular adjustment
-        this.angle += Math.sign(angleDiff) * Math.min(this.handling * 0.8, Math.abs(angleDiff));
-
-        // Speed Logic
-        this.speed = Math.min(this.speed + this.accel * 0.9, maxVel * 0.85);
-    }
-
-    trackRacePosition() {
-        if (this.lapCooldown > 0) this.lapCooldown--;
-
-        // Vector measurement against track zero waypoint (Start line)
-        let startPoint = roadWaypoints[0];
-        let d = Math.hypot(this.x - startPoint.x, this.y - startPoint.y);
-
-        if (d < 90 && this.lapCooldown === 0) {
-            if (this.nextWaypointIndex > roadWaypoints.length / 2) {
-                this.currentLap++;
-                this.lapCooldown = 150; // Prevent duplicate multi-lap triggers
-                if (!this.isAI && this.currentLap > totalLaps) {
-                    executeRaceEnd(true);
-                }
-            }
-        }
-    }
-
-    draw() {
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.angle);
-
-        // Neon Glow Profiling
-        ctx.shadowBlur = 12;
-        ctx.shadowColor = this.color;
-
-        // Draw Formula 1 Detailed Wheels Layout
-        ctx.fillStyle = '#111';
-        ctx.fillRect(-14, -13, 8, 5);  // Front Left
-        ctx.fillRect(-14, 8, 8, 5);   // Front Right
-        ctx.fillRect(8, -14, 9, 6);    // Rear Left
-        ctx.fillRect(8, 8, 9, 6);     // Rear Right
-
-        // Main F1 High Performance Aerodynamic Casing
-        ctx.fillStyle = this.color;
-        ctx.fillRect(-15, -8, 30, 16); 
-        
-        // Front Wing Structure
-        ctx.fillStyle = '#222';
-        ctx.fillRect(-18, -11, 4, 22);
-        // Rear Spoiler Wing
-        ctx.fillRect(14, -12, 3, 24);
-
-        // Drivers Glass Cockpit Pod
-        ctx.fillStyle = '#fff';
-        ctx.fillRect(-4, -4, 8, 8);
-
-        // Draw Buff Active States
-        if (this.shieldActive) {
-            ctx.strokeStyle = '#e200ff';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(0, 0, 24, 0, Math.PI*2);
-            ctx.stroke();
-        }
-
-        ctx.restore();
+        roadSegments.push({
+            index: roadSegments.length,
+            curve: curveIntensity,
+            asset: asset,
+            color: Math.floor(roadSegments.length / 3) % 2 === 0 ? { road: '#151522', kerb: '#ff0044', line: '#fff' } : { road: '#10101b', kerb: '#ffffff', line: '#000' }
+        });
     }
 }
 
-/**
- * ENVIRONMENTAL DYNAMICS & POWERUP GENERATORS
- */
-class Collectible {
-    constructor(x, y, type) {
-        this.x = x;
-        this.y = y;
-        this.type = type; // 'COIN', 'NITRO', 'SHIELD', 'MAGNET'
-        this.pulse = 0;
-    }
-
-    update() {
-        this.pulse += 0.08;
-        
-        // Magnet mechanics processing loop
-        if (playerCar && playerCar.magnetActive && this.type === 'COIN') {
-            let dist = Math.hypot(playerCar.x - this.x, playerCar.y - this.y);
-            if (dist < 180) {
-                this.x += (playerCar.x - this.x) * 0.08;
-                this.y += (playerCar.y - this.y) * 0.08;
-            }
-        }
-    }
-
-    draw() {
-        ctx.save();
-        ctx.shadowBlur = 10;
-        let size = 8 + Math.sin(this.pulse) * 2;
-
-        if (this.type === 'COIN') {
-            ctx.fillStyle = '#ffd700';
-            ctx.shadowColor = '#ffd700';
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, size, 0, Math.PI*2);
-            ctx.fill();
-        } else {
-            ctx.lineWidth = 2;
-            if (this.type === 'NITRO') { ctx.fillStyle = '#ff007f'; ctx.shadowColor = '#ff007f'; }
-            if (this.type === 'SHIELD') { ctx.fillStyle = '#00fff2'; ctx.shadowColor = '#00fff2'; }
-            if (this.type === 'MAGNET') { ctx.fillStyle = '#a100ff'; ctx.shadowColor = '#a100ff'; }
-            
-            ctx.beginPath();
-            ctx.moveTo(this.x, this.y - size);
-            ctx.lineTo(this.x + size, this.y + size);
-            ctx.lineTo(this.x - size, this.y + size);
-            ctx.closePath();
-            ctx.fill();
-        }
-        ctx.restore();
-    }
-}
-
-function createParticle(x, y, color, size) {
-    particles.push({
-        x: x, y: y,
-        xv: (Math.random() - 0.5) * 2,
-        yv: (Math.random() - 0.5) * 2,
-        size: size,
-        life: 1.0,
-        color: color
+function calculateMiniMapSkeleton() {
+    mapWaypoints = [];
+    let cx = 0, cy = 0, angle = 0;
+    roadSegments.forEach((seg, idx) => {
+        angle += seg.curve * 0.04;
+        cx += Math.sin(angle) * 3;
+        cy -= Math.cos(angle) * 3;
+        if (idx % 10 === 0) mapWaypoints.push({ x: cx, y: cy });
     });
 }
 
 /**
- * HIGH CONCURRENCY TRACK BUILDER
+ * ENGINE GAME LOOP REGISTRARS & INITIALIZATION
  */
-function interpolateWaypoints() {
-    roadWaypoints = [];
-    let track = TRACKS[currentLevel];
-    let pts = track.points;
-
-    for (let i = 0; i < pts.length; i++) {
-        let p1 = pts[i];
-        let p2 = pts[(i + 1) % pts.length];
-
-        // Fill up spacing segments dynamically to structure smooth coordinates mapping
-        let segments = 35;
-        for (let s = 0; s < segments; s++) {
-            let t = s / segments;
-            let nx = p1.x * (1 - t) + p2.x * t;
-            let ny = p1.y * (1 - t) + p2.y * t;
-            roadWaypoints.push({ x: nx, y: ny });
-        }
-    }
-}
-
-function renderTrackCasing() {
-    let track = TRACKS[currentLevel];
+function startRaceSequence() {
+    buildRaceTrack3D();
     
-    // Draw Safe Asphalt Underlayer Foundation Strip
-    ctx.strokeStyle = '#141428';
-    ctx.lineWidth = track.width + 16;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.beginPath();
-    roadWaypoints.forEach((p, idx) => {
-        if (idx === 0) ctx.moveTo(p.x, p.y);
-        else ctx.lineTo(p.x, p.y);
-    });
-    ctx.closePath();
-    ctx.stroke();
+    playerProgress = 0;
+    playerX = 0;
+    playerSpeed = 0;
+    playerLap = 1;
+    internalCredits = 0;
 
-    // Draw Cyberpunk High Vis Glowing Boundary Rails
-    ctx.strokeStyle = '#ff0055';
-    ctx.lineWidth = track.width;
-    ctx.shadowBlur = 6;
-    ctx.shadowColor = '#ff0055';
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-
-    // Inside Matte Driveable Lane
-    ctx.strokeStyle = '#0d0d1a';
-    ctx.lineWidth = track.width - 8;
-    ctx.stroke();
-
-    // Finish Grid Mesh Overlay Indicator
-    let start = roadWaypoints[0];
-    let next = roadWaypoints[1];
-    let angle = Math.atan2(next.y - start.y, next.x - start.x);
-    
-    ctx.save();
-    ctx.translate(start.x, start.y);
-    ctx.rotate(angle);
-    ctx.fillStyle = '#fff';
-    for (let j = -track.width/2; j < track.width/2; j += 12) {
-        ctx.fillRect(0, j, 6, 6);
-        ctx.fillRect(6, j + 6, 6, 6);
-    }
-    ctx.restore();
-}
-
-/**
- * ENGINE LIFECYCLE CONTROLLERS & RIGGING
- */
-function initializeRaceRuntime() {
-    interpolateWaypoints();
-    
-    // Spawn Player
-    let startPoint = roadWaypoints[0];
-    let nextPoint = roadWaypoints[1];
-    let initAngle = Math.atan2(nextPoint.y - startPoint.y, nextPoint.x - startPoint.x);
-    
-    playerCar = new Car(startPoint.x, startPoint.y + 15, initAngle, false, config.carType);
-    
-    // Clear & Populate AI Registry
-    aiCars = [];
-    for (let i = 0; i < parseInt(config.aiCount); i++) {
-        let offsetSpacing = -25 - (i * 20);
-        let ai = new Car(startPoint.x + Math.sin(initAngle)*offsetSpacing, startPoint.y - Math.cos(initAngle)*offsetSpacing, initAngle, true, 'SPEED', i+1);
-        aiCars.push(ai);
+    // Build Competitors Dynamic Vectors
+    opponents = [];
+    let aiTotal = parseInt(config.aiCount);
+    for (let i = 0; i < aiTotal; i++) {
+        opponents.push({
+            id: i + 1,
+            progress: 4000 + (i * 2500),
+            laneX: (i % 2 === 0 ? -0.5 : 0.5),
+            speed: 160 + Math.random() * 40,
+            color: `hsl(${(i * 75) % 360}, 95%, 50%)`
+        });
     }
 
-    // Populate Level Loot Safely on Road Centers
-    coins = [];
-    powerups = [];
-    particles = [];
-    coinsCollected = 0;
-
-    for (let step = 10; step < roadWaypoints.length; step += 15) {
-        let wp = roadWaypoints[step];
-        if (Math.random() < 0.6) {
-            coins.push(new Collectible(wp.x + (Math.random()-0.5)*30, wp.y + (Math.random()-0.5)*30, 'COIN'));
-        } else if (Math.random() < 0.12) {
-            let types = ['NITRO', 'SHIELD', 'MAGNET'];
-            let randomType = types[Math.floor(Math.random() * types.length)];
-            powerups.push(new Collectible(wp.x, wp.y, randomType));
-        }
-    }
-
-    // Trigger UI Viewports Switches
+    // Toggle Visibility Layers
     document.getElementById('menu-screen').classList.add('hidden');
     document.getElementById('settings-modal').classList.add('hidden');
     document.getElementById('hud').classList.remove('hidden');
     document.getElementById('btn-settings-trigger').classList.remove('hidden');
+    document.getElementById('camera-toggle').classList.remove('hidden');
 
-    if (config.controlScheme === 'TOUCH') {
-        document.getElementById('touch-overlay').style.display = 'flex';
-    } else {
-        document.getElementById('touch-overlay').style.display = 'none';
-    }
-
-    // Initialize Race Launch Counter Sequencer
-    runCountdownSequence();
-}
-
-function runCountdownSequence() {
+    document.getElementById('touch-overlay').style.display = config.controlScheme === 'TOUCH' ? 'flex' : 'none';
+    
     isControllable = false;
-    countdownVal = 3;
-    let el = document.getElementById('countdown');
-    el.style.display = 'block';
-    el.innerText = countdownVal;
+    let countNode = document.getElementById('countdown');
+    countNode.style.display = 'block';
+    let val = 3;
+    countNode.innerText = val;
 
     let timer = setInterval(() => {
-        countdownVal--;
-        if (countdownVal === 0) {
-            el.innerText = "GO!";
+        val--;
+        if (val === 0) {
+            countNode.innerText = "GO!";
             isControllable = true;
-        } else if (countdownVal < 0) {
+        } else if (val < 0) {
             clearInterval(timer);
-            el.style.display = 'none';
+            countNode.style.display = 'none';
         } else {
-            el.innerText = countdownVal;
+            countNode.innerText = val;
         }
     }, 1000);
 }
 
 /**
- * COLLISION MATRIX CALCULATORS
+ * CORE GRAPHICS PERSPECTIVE TRANSFORMATIONS
  */
-function checkPhysicsCollisions() {
-    let trackWidth = TRACKS[currentLevel].width;
+function render3DViewPipeline() {
+    ctx.clearRect(0, 0, screenWidth, screenHeight);
 
-    // Process Player boundaries against Track boundaries
-    let insideTrack = false;
-    for (let i = 0; i < roadWaypoints.length; i++) {
-        let dist = Math.hypot(playerCar.x - roadWaypoints[i].x, playerCar.y - roadWaypoints[i].y);
-        if (dist < trackWidth / 2) {
-            insideTrack = true;
-            break;
+    // 1. Draw Adaptive Horizon Skies & Synthetic Grandstands Background
+    let playerSegmentIndex = Math.floor(playerProgress / 200) % roadSegments.length;
+    let activeSegment = roadSegments[playerSegmentIndex];
+    
+    // Draw Sky Backdrop Box
+    ctx.fillStyle = '#060614';
+    ctx.fillRect(0, 0, screenWidth, screenHeight * 0.5);
+    
+    // Synthetic Grandstands / Chairs Patterns
+    ctx.fillStyle = '#221133';
+    ctx.fillRect(0, screenHeight * 0.44, screenWidth, screenHeight * 0.06);
+    ctx.fillStyle = '#ff0055';
+    for (let x = 0; x < screenWidth; x += 16) {
+        ctx.fillRect(x + (activeSegment.curve * -200 % 16), screenHeight * 0.44, 6, 8); // Animated Crowd Dots
+    }
+
+    // Ground Canvas Strip
+    ctx.fillStyle = '#0a190a';
+    ctx.fillRect(0, screenHeight * 0.5, screenWidth, screenHeight * 0.5);
+
+    // 2. Process Pseudo-3D Perspective Mathematical Rendering Projection
+    let currentSegmentIndex = Math.floor(playerProgress / 200);
+    let cumulativeCurve = 0;
+    let maxRenderDepth = 80;
+
+    let projectedRoadLines = [];
+
+    for (let i = 0; i < maxRenderDepth; i++) {
+        let seg = roadSegments[(currentSegmentIndex + i) % roadSegments.length];
+        if (!seg) continue;
+
+        let z1 = (currentSegmentIndex + i) * 200 - playerProgress;
+        if (z1 <= 0) z1 = 1; // Safeguard division-by-zero crashes
+
+        cumulativeCurve += seg.curve;
+
+        // Apply Perspective Coordinates
+        let camHeight = 1200;
+        let scale = 1.8 / (z1 / camHeight);
+        let roadY = screenHeight * 0.5 + (camHeight / z1) * (screenHeight * 0.5) * 0.12;
+        let roadWidth = 450 * scale;
+        let roadCenterX = screenWidth * 0.5 + (cumulativeCurve * 15 * scale) - (playerX * roadWidth);
+
+        projectedRoadLines.push({ y: roadY, w: roadWidth, x: roadCenterX, segment: seg, scaleFactor: scale });
+    }
+
+    // Render perspective polygons backward (from sky boundary down to bumper viewport)
+    for (let i = projectedRoadLines.length - 2; i >= 0; i--) {
+        let p1 = projectedRoadLines[i + 1];
+        let p2 = projectedRoadLines[i];
+
+        if (p1.y >= screenHeight || p2.y >= screenHeight || p1.y <= screenHeight * 0.48) continue;
+
+        // Render Road Asphalt Area Surface
+        ctx.fillStyle = p2.segment.color.road;
+        ctx.beginPath();
+        ctx.moveTo(p1.x - p1.w, p1.y);
+        ctx.lineTo(p1.x + p1.w, p1.y);
+        ctx.lineTo(p2.x + p2.w, p2.y);
+        ctx.lineTo(p2.x - p2.w, p2.y);
+        ctx.closePath();
+        ctx.fill();
+
+        // Outer Neon Boundary Kerbs / Rumble Strips
+        let kerbW1 = p1.w * 0.12, kerbW2 = p2.w * 0.12;
+        ctx.fillStyle = p2.segment.color.kerb;
+        
+        // Left Edge Strip Line
+        ctx.beginPath();
+        ctx.moveTo(p1.x - p1.w - kerbW1, p1.y); ctx.lineTo(p1.x - p1.w, p1.y);
+        ctx.lineTo(p2.x - p2.w, p2.y); ctx.lineTo(p2.x - p2.w - kerbW2, p2.y);
+        ctx.closePath(); ctx.fill();
+
+        // Right Edge Strip Line
+        ctx.beginPath();
+        ctx.moveTo(p1.x + p1.w, p1.y); ctx.lineTo(p1.x + p1.w + kerbW1, p1.y);
+        ctx.lineTo(p2.x + p2.w + kerbW2, p2.y); ctx.lineTo(p2.x + p2.w, p2.y);
+        ctx.closePath(); ctx.fill();
+
+        // Render Operational Race Assets (Coins/Powerups)
+        if (p2.segment.asset) {
+            let itemX = p2.x + (p2.segment.asset.lane * p2.w);
+            let itemSize = 14 * p2.scaleFactor;
+            if (itemSize > 1) {
+                ctx.save();
+                ctx.shadowBlur = 15;
+                if (p2.segment.asset.type === 'COIN') {
+                    ctx.fillStyle = '#ffd700'; ctx.shadowColor = '#ffd700';
+                    ctx.beginPath(); ctx.arc(itemX, p2.y - itemSize, itemSize, 0, Math.PI*2); ctx.fill();
+                } else {
+                    ctx.fillStyle = '#ff007f'; ctx.shadowColor = '#ff007f';
+                    ctx.fillRect(itemX - itemSize, p2.y - itemSize * 2, itemSize * 2, itemSize * 2);
+                }
+                ctx.restore();
+            }
         }
     }
 
-    // Penalize off-road drift behavior
-    if (!insideTrack && !playerCar.shieldActive) {
-        playerCar.speed = Math.max(playerCar.speed * 0.85, 1.5);
-        createParticle(playerCar.x, playerCar.y, '#ff0055', 4);
-    }
+    // 3. Render Competitors (AI Vehicles) inside 3D Perspective Pipeline
+    opponents.forEach(ai => {
+        let aiSegIndex = Math.floor(ai.progress / 200);
+        if (aiSegIndex >= currentSegmentIndex && aiSegIndex < currentSegmentIndex + maxRenderDepth) {
+            let depthOffset = aiSegIndex - currentSegmentIndex;
+            let line = projectedRoadLines[depthOffset];
+            if (line) {
+                let carX = line.x + (ai.laneX * line.w);
+                let carW = 68 * line.scaleFactor;
+                let carH = 34 * line.scaleFactor;
+                let carY = line.y;
 
-    // Check Loot Triggers (Coins)
-    for (let i = coins.length - 1; i >= 0; i--) {
-        let d = Math.hypot(playerCar.x - coins[i].x, playerCar.y - coins[i].y);
-        if (d < 25) {
-            coins.splice(i, 1);
-            coinsCollected += 10;
-            continue;
-        }
-    }
+                if (carW > 4 && carY < screenHeight) {
+                    ctx.save();
+                    ctx.shadowBlur = 10; ctx.shadowColor = ai.color;
+                    
+                    // Aerodynamic pointed F1 Chassis Structure Base
+                    ctx.fillStyle = ai.color;
+                    ctx.beginPath();
+                    ctx.moveTo(carX - carW/2, carY);
+                    ctx.lineTo(carX, carY - carH);
+                    ctx.lineTo(carX + carW/2, carY);
+                    ctx.closePath(); ctx.fill();
 
-    // Check Buff Items pickup Triggers
-    for (let i = powerups.length - 1; i >= 0; i--) {
-        let d = Math.hypot(playerCar.x - powerups[i].x, playerCar.y - powerups[i].y);
-        if (d < 25) {
-            let picked = powerups[i].type;
-            powerups.splice(i, 1);
-
-            if (picked === 'NITRO') playerCar.nitroTimer = 180;
-            if (picked === 'SHIELD') {
-                playerCar.shieldActive = true;
-                setTimeout(() => playerCar.shieldActive = false, 5000);
+                    // Rear spoiler markings assembly
+                    ctx.fillStyle = '#111';
+                    ctx.fillRect(carX - carW*0.6, carY - carH, carW * 1.2, carH * 0.2);
+                    ctx.restore();
+                }
             }
-            if (picked === 'MAGNET') {
-                playerCar.magnetActive = true;
-                setTimeout(() => playerCar.magnetActive = false, 7000);
-            }
-        }
-    }
-
-    // Process Vehicle Inter-Collision Engine (Player vs AI)
-    aiCars.forEach(ai => {
-        let d = Math.hypot(playerCar.x - ai.x, playerCar.y - ai.y);
-        if (d < 26) { // Intersection breach
-            let angle = Math.atan2(playerCar.y - ai.y, playerCar.x - ai.x);
-            
-            if (!playerCar.shieldActive) {
-                playerCar.speed *= 0.6;
-                playerCar.x += Math.cos(angle) * 12;
-                playerCar.y += Math.sin(angle) * 12;
-            }
-            ai.speed *= 0.5;
-            
-            // Generate visual spark effects
-            for(let k=0; k<8; k++) createParticle(playerCar.x, playerCar.y, '#fff', 5);
         }
     });
-}
 
-function executeRaceEnd(isWin) {
-    isControllable = false;
-    gameState = 'MENU';
-    alert(isWin ? `VICTORY! Total Level Earnings: ${coinsCollected} Coins.` : "RACE OVER!");
-    
-    if (isWin && currentLevel === 1) {
-        currentLevel = 2; // Auto advance to tighter level
-    } else {
-        currentLevel = 1;
+    // 4. Render Active Cockpit / Dashboard Framework Layout HUD Overlay
+    if (currentCameraMode === 'COCKPIT') {
+        renderCockpitLayer();
     }
-    
-    document.getElementById('hud').classList.add('hidden');
-    document.getElementById('btn-settings-trigger').classList.add('hidden');
-    document.getElementById('touch-overlay').style.display = 'none';
-    document.getElementById('menu-screen').classList.remove('hidden');
+
+    // 5. Render Professional High-Vis Mini-Map Node Engine Overlay
+    renderMiniMapOverlay();
 }
 
 /**
- * CENTRAL TICK EXECUTION LOOP
+ * COCKPIT ARTISTIC ASYMPTOTIC CANVAS ASSEMBLER
  */
-function gameTickLoop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+function renderCockpitLayer() {
+    ctx.save();
+    
+    // Steering offset response matrix
+    let turnOffset = 0;
+    if (inputs.left) turnOffset = -40;
+    if (inputs.right) turnOffset = 40;
 
-    if (gameState === 'RUNNING') {
-        // Camera Tracking Target Assignment Matrix
-        ctx.save();
-        ctx.translate(canvas.width / 2 - playerCar.x, canvas.height / 2 - playerCar.y);
+    let baseH = screenHeight * 0.72;
 
-        // Core Render Pipeline Execution
-        renderTrackCasing();
-        
-        coins.forEach(c => { c.update(); c.draw(); });
-        powerups.forEach(p => { p.update(); p.draw(); });
-        
-        // Update & Render Actors
-        playerCar.update();
-        playerCar.draw();
+    // Outer Carbon-Fiber Structural Cockpit Border
+    ctx.fillStyle = '#111116';
+    ctx.beginPath();
+    ctx.moveTo(0, screenHeight);
+    ctx.lineTo(screenWidth * 0.2, baseH);
+    ctx.lineTo(screenWidth * 0.8, baseH);
+    ctx.lineTo(screenWidth, screenHeight);
+    ctx.closePath();
+    ctx.fill();
 
-        aiCars.forEach(ai => {
-            ai.update();
-            ai.draw();
-        });
+    // Central Digital Dashboard HUD Enclosure
+    ctx.fillStyle = '#1b1b22';
+    ctx.strokeStyle = '#00fff2';
+    ctx.lineWidth = 3;
+    ctx.fillRect(screenWidth*0.38, baseH + 10, screenWidth*0.24, 70);
+    ctx.strokeRect(screenWidth*0.38, baseH + 10, screenWidth*0.24, 70);
 
-        // Compute Particle FX pipeline
-        for (let i = particles.length - 1; i >= 0; i--) {
-            let p = particles[i];
-            p.x += p.xv; p.y += p.yv;
-            p.life -= 0.02;
-            if (p.life <= 0) particles.splice(i, 1);
-            else {
-                ctx.fillStyle = p.color;
-                ctx.globalAlpha = p.life;
-                ctx.fillRect(p.x, p.y, p.size, p.size);
-                ctx.globalAlpha = 1.0;
+    // Digital RPM Bars / Speed readouts
+    ctx.fillStyle = '#00fff2';
+    ctx.font = "bold 1.1rem monospace";
+    ctx.fillText(`GEAR: 6`, screenWidth*0.4, baseH + 35);
+    ctx.fillStyle = '#ff007f';
+    let rmpBarWidth = (playerSpeed / maxSpeed) * 100;
+    ctx.fillRect(screenWidth*0.4, baseH + 50, rmpBarWidth, 14);
+
+    // Render Movable F1 Steering Wheel Unit
+    ctx.translate(screenWidth * 0.5 + (turnOffset * 0.2), screenHeight * 0.9);
+    ctx.rotate(turnOffset * 0.012);
+
+    // Wheel Circle Rim Ring
+    ctx.lineWidth = 32;
+    ctx.strokeStyle = '#25252b';
+    ctx.beginPath();
+    ctx.arc(0, 0, 110, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Center Core Controller Housing Block
+    ctx.fillStyle = '#0f0f14';
+    ctx.fillRect(-60, -40, 120, 80);
+    
+    // Neon Operations Quick Buttons
+    ctx.fillStyle = '#ff0055'; ctx.beginPath(); ctx.arc(-40, -15, 8, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#00fff2'; ctx.beginPath(); ctx.arc(40, -15, 8, 0, Math.PI*2); ctx.fill();
+
+    ctx.restore();
+}
+
+/**
+ * HIGH INTERACTIVITY MINI-MAP GRAPHICS ENGINE OVERLAY
+ */
+function renderMiniMapOverlay() {
+    ctx.save();
+    
+    // Position Map Frame on Right Bottom Base Sector
+    let mapSize = 120;
+    let mx = screenWidth - mapSize - 25;
+    let my = screenHeight - mapSize - (currentCameraMode === 'COCKPIT' ? 140 : 40);
+
+    // Render Translucent Map Background Container box
+    ctx.fillStyle = 'rgba(5, 5, 10, 0.7)';
+    ctx.strokeStyle = '#ff007f';
+    ctx.lineWidth = 2;
+    ctx.fillRect(mx - 10, my - 10, mapSize + 20, mapSize + 20);
+    ctx.strokeRect(mx - 10, my - 10, mapSize + 20, mapSize + 20);
+
+    // Normalize coordinates mapping bounds
+    ctx.strokeStyle = 'rgba(0, 255, 242, 0.4)';
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    
+    mapWaypoints.forEach((wp, idx) => {
+        // Linear scale matching constraints safely
+        let wx = mx + mapSize/2 + wp.x * 0.6;
+        let wy = my + mapSize/2 + wp.y * 0.6;
+        if (idx === 0) ctx.moveTo(wx, wy);
+        else ctx.lineTo(wx, wy);
+    });
+    ctx.closePath();
+    ctx.stroke();
+
+    // Calculate & project Current Player Node Positioning
+    let playerIdx = Math.floor((playerProgress / trackLength) * mapWaypoints.length) % mapWaypoints.length;
+    let pNode = mapWaypoints[playerIdx];
+    if (pNode) {
+        ctx.fillStyle = '#00fff2'; // Blue Dot
+        ctx.shadowBlur = 10; ctx.shadowColor = '#00fff2';
+        ctx.beginPath();
+        ctx.arc(mx + mapSize/2 + pNode.x * 0.6, my + mapSize/2 + pNode.y * 0.6, 6, 0, Math.PI*2);
+        ctx.fill();
+    }
+
+    // Loop through Opponents mapping positions
+    opponents.forEach(ai => {
+        let aiIdx = Math.floor((ai.progress / trackLength) * mapWaypoints.length) % mapWaypoints.length;
+        let aiNode = mapWaypoints[aiIdx];
+        if (aiNode) {
+            ctx.fillStyle = '#ff003c'; // Red Dot for opponents
+            ctx.shadowBlur = 8; ctx.shadowColor = '#ff003c';
+            ctx.beginPath();
+            ctx.arc(mx + mapSize/2 + aiNode.x * 0.6, my + mapSize/2 + aiNode.y * 0.6, 5, 0, Math.PI*2);
+            ctx.fill();
+        }
+    });
+
+    ctx.restore();
+}
+
+/**
+ * 60FPS PHYSICS PROCESSING LOOP
+ */
+function runRacePhysicsCalculations() {
+    if (gameState !== 'RUNNING' || !isControllable) return;
+
+    // 1. Process Input Speeds Accelerations Models
+    if (inputs.gas) {
+        playerSpeed = Math.min(playerSpeed + 2.5, maxSpeed);
+    } else if (inputs.brake) {
+        playerSpeed = Math.max(playerSpeed - 4.5, 0);
+    } else {
+        playerSpeed = Math.max(playerSpeed - 1.2, 0);
+    }
+
+    playerProgress += playerSpeed * 0.75;
+
+    // 2. Lateral Turning Displacements Calculations
+    let currentSegIndex = Math.floor(playerProgress / 200) % roadSegments.length;
+    let currentSeg = roadSegments[currentSegIndex];
+
+    if (config.controlScheme === 'TILT') {
+        playerX += tiltX * 0.04;
+    } else {
+        if (inputs.left) playerX -= 0.045;
+        if (inputs.right) playerX += 0.045;
+    }
+
+    // Auto apply centrifugal force vector pull during high curve zones
+    if (currentSeg) {
+        playerX -= (playerSpeed / maxSpeed) * currentSeg.curve * 1.8;
+    }
+
+    // Prevent cross breaching outer track lanes boundaries limits
+    if (playerX < -1.4) playerX = -1.4;
+    if (playerX > 1.4) playerX = 1.4;
+
+    // Check if player driving off-road (Grass penalty zone slows down vehicle)
+    if (Math.abs(playerX) > 1.0) {
+        playerSpeed = Math.max(playerSpeed - 4.0, 60);
+    }
+
+    // 3. Process Active Items Collisions Inside Canvas Array Registry
+    if (currentSeg && currentSeg.asset) {
+        let dX = Math.abs(playerX - currentSeg.asset.lane);
+        if (dX < 0.25) {
+            if (currentSeg.asset.type === 'COIN') {
+                internalCredits += 50;
+            } else if (currentSeg.asset.type === 'NITRO') {
+                playerSpeed = Math.min(playerSpeed + 60, maxSpeed * 1.2);
             }
+            currentSeg.asset = null; // Consume collectible slot
+        }
+    }
+
+    // 4. Update AI Fleet positions processing loop
+    opponents.forEach(ai => {
+        let aiSegIndex = Math.floor(ai.progress / 200) % roadSegments.length;
+        let aiSeg = roadSegments[aiSegIndex];
+        
+        // Add random variations or aggressive blocking lines adjustments
+        if (config.aiAggressive === 'ON' && Math.random() < 0.1) {
+            ai.laneX += (playerX - ai.laneX) * 0.12;
         }
 
-        ctx.restore();
+        ai.progress += ai.speed * 0.72;
 
-        // Run Intersect Physics Calculators
-        checkPhysicsCollisions();
+        // Process Inter-vehicle Crash impacts rules logic
+        if (Math.floor(ai.progress / 200) === currentSegIndex) {
+            if (Math.abs(playerX - ai.laneX) < 0.3) {
+                playerSpeed = Math.max(playerSpeed * 0.5, 40); // Hard penalty breakdown impact
+                ai.speed *= 0.6;
+            }
+        }
+    });
 
-        // Feed Realtime Updates to Active HUD Element Layers
-        document.getElementById('hud-speed').innerText = `${Math.round(playerCar.speed * 32)} KM/H`;
-        document.getElementById('hud-coins').innerText = `COINS: ${coinsCollected}`;
-        document.getElementById('hud-lap').innerText = `LAP: ${playerCar.currentLap} / ${totalLaps}`;
-        
-        // Calculate Position placement ranking
-        let rank = 1;
-        aiCars.forEach(ai => {
-            if (ai.currentLap > playerCar.currentLap) rank++;
-            else if (ai.currentLap === playerCar.currentLap && ai.nextWaypointIndex > playerCar.nextWaypointIndex) rank++;
-        });
-        document.getElementById('hud-pos').innerText = `POS: ${rank} / ${aiCars.length + 1}`;
+    // 5. Track Progression Multi-Lap Boundaries Counter Check
+    if (playerProgress >= trackLength) {
+        playerProgress = 0;
+        playerLap++;
+        if (playerLap > totalLaps) {
+            gameState = 'MENU';
+            alert(`GRAND PRIX COMPLETE! Credits Earned: ${internalCredits}`);
+            document.getElementById('hud').classList.add('hidden');
+            document.getElementById('camera-toggle').classList.add('hidden');
+            document.getElementById('btn-settings-trigger').classList.add('hidden');
+            document.getElementById('touch-overlay').style.display = 'none';
+            document.getElementById('menu-screen').classList.remove('hidden');
+        }
     }
-
-    requestAnimationFrame(gameTickLoop);
 }
 
 /**
- * COMPREHENSIVE INPUT DRIVER HOOKS
+ * ENGINE FRAME REGISTRAR CONTROL TICKS
+ */
+function engineCoreLifecycleTick() {
+    runRacePhysicsCalculations();
+    render3DViewPipeline();
+
+    // Map Telemetry outputs direct inside HUD Document layout bindings
+    if (gameState === 'RUNNING') {
+        document.getElementById('hud-speed').innerText = `${Math.round(playerSpeed)} KM/H`;
+        document.getElementById('hud-coins').innerText = `CREDITS: ${internalCredits}`;
+        document.getElementById('hud-lap').innerText = `LAP: ${playerLap} / ${totalLaps}`;
+        
+        // Calculate Position Placement rank live
+        let rank = 1;
+        opponents.forEach(ai => { if (ai.progress > playerProgress) rank++; });
+        document.getElementById('hud-pos').innerText = `POS: ${rank} / ${opponents.length + 1}`;
+    }
+
+    requestAnimationFrame(engineCoreLifecycleTick);
+}
+
+/**
+ * COMPREHENSIVE INPUT ACTION INTERFACE CONFIGURATIONS
  */
 document.getElementById('btn-start').addEventListener('click', () => {
     config.carType = document.getElementById('select-car').value;
@@ -914,49 +791,51 @@ document.getElementById('btn-start').addEventListener('click', () => {
     config.aiAggressive = document.getElementById('select-aggression').value;
 
     gameState = 'RUNNING';
-    initializeRaceRuntime();
+    startRaceSequence();
 });
 
-// Settings Overlay Management Triggers
+// Realtime dynamic Camera toggle interface switch click handler
+const camBtn = document.getElementById('camera-toggle');
+camBtn.addEventListener('click', () => {
+    if (currentCameraMode === 'COCKPIT') {
+        currentCameraMode = 'BUMPER';
+        camBtn.innerText = "CAMERA: BUMPER CAM";
+    } else {
+        currentCameraMode = 'COCKPIT';
+        camBtn.innerText = "CAMERA: COCKPIT";
+    }
+});
+
+// Runtime Settings System Override Trigger Listeners
 const triggerBtn = document.getElementById('btn-settings-trigger');
 const modal = document.getElementById('settings-modal');
 
 triggerBtn.addEventListener('click', () => {
     gameState = 'PAUSED';
-    isControllable = false;
-    
-    // Prefill currently assigned setup schema options dynamically
     document.getElementById('runtime-controls').value = config.controlScheme;
     document.getElementById('runtime-aggression').value = config.aiAggressive;
-    
     modal.classList.remove('hidden');
 });
 
 document.getElementById('btn-resume').addEventListener('click', () => {
     config.controlScheme = document.getElementById('runtime-controls').value;
     config.aiAggressive = document.getElementById('runtime-aggression').value;
-    
-    if (config.controlScheme === 'TOUCH') {
-        document.getElementById('touch-overlay').style.display = 'flex';
-    } else {
-        document.getElementById('touch-overlay').style.display = 'none';
-    }
-
+    document.getElementById('touch-overlay').style.display = config.controlScheme === 'TOUCH' ? 'flex' : 'none';
     modal.classList.add('hidden');
     gameState = 'RUNNING';
-    isControllable = true;
 });
 
 document.getElementById('btn-restart').addEventListener('click', () => {
     modal.classList.add('hidden');
     document.getElementById('hud').classList.add('hidden');
+    camBtn.classList.add('hidden');
     triggerBtn.classList.add('hidden');
     document.getElementById('touch-overlay').style.display = 'none';
     gameState = 'MENU';
     document.getElementById('menu-screen').classList.remove('hidden');
 });
 
-// Control Mapping Layout Listeners (Keyboard Fallbacks for Desktop Tests)
+// Keyboard fallback interface actions (For desktop testing diagnostics)
 window.addEventListener('keydown', e => {
     if (e.key === 'ArrowLeft' || e.key === 'a') inputs.left = true;
     if (e.key === 'ArrowRight' || e.key === 'd') inputs.right = true;
@@ -970,60 +849,52 @@ window.addEventListener('keyup', e => {
     if (e.key === 'ArrowDown' || e.key === 's') inputs.brake = false;
 });
 
-// Screen Overlay Touch Controllers Event Registrations
-const bindTouch = (id, targetProp) => {
+// Screen D-Pad Touch Interfaces Handlers Registration
+const configureTouchBind = (id, prop) => {
     const el = document.getElementById(id);
-    el.addEventListener('touchstart', (e) => { e.preventDefault(); inputs[targetProp] = true; });
-    el.addEventListener('touchend', (e) => { e.preventDefault(); inputs[targetProp] = false; });
+    el.addEventListener('touchstart', (e) => { e.preventDefault(); inputs[prop] = true; });
+    el.addEventListener('touchend', (e) => { e.preventDefault(); inputs[prop] = false; });
 };
-bindTouch('btn-left', 'left');
-bindTouch('btn-right', 'right');
-bindTouch('btn-gas', 'gas');
-bindTouch('btn-brake', 'brake');
+configureTouchBind('btn-left', 'left');
+configureTouchBind('btn-right', 'right');
+configureTouchBind('btn-gas', 'gas');
+configureTouchBind('btn-brake', 'brake');
 
-// Motion Gyro API Driver Linkage
+// Mobile Gyro Sensor Linkage Drivers Event Handlers
 if (window.DeviceOrientationEvent) {
     window.addEventListener('deviceorientation', (e) => {
-        // Evaluate gamma tilt orientation values safely
-        let tilt = e.gamma; // Range: [-90, 90]
-        if (window.orientation === 90) tilt = -e.beta;
-        else if (window.orientation === -90) tilt = e.beta;
+        let rawTilt = e.gamma; // Landscape orientation mapping tracker bounds
+        if (window.orientation === 90) rawTilt = -e.beta;
+        else if (window.orientation === -90) rawTilt = e.beta;
         
-        if(Math.abs(tilt) > 4) {
-            tiltAngle = (tilt / 45); // Constrain normalized vector balance
-        } else {
-            tiltAngle = 0;
-        }
+        if (Math.abs(rawTilt) > 3) tiltX = (rawTilt / 35);
+        else tiltX = 0;
     }, true);
 }
 
-// Global Swipe Gesture Analyzer Pipeline
+// Swipe Gesture Analyzer Layout Core Linkage
 window.addEventListener('touchstart', e => {
     if (config.controlScheme !== 'SWIPE') return;
     touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-    inputs.gas = true; // Auto-accelerate when operating under swipe setups
+    inputs.gas = true; // Auto accelerate
 }, {passive: true});
 
 window.addEventListener('touchmove', e => {
     if (config.controlScheme !== 'SWIPE' || !touchStartX) return;
-    let dx = e.touches[0].clientX - touchStartX;
-    
-    if (dx < -30) { inputs.left = true; inputs.right = false; }
-    else if (dx > 30) { inputs.right = true; inputs.left = false; }
+    let diff = e.touches[0].clientX - touchStartX;
+    if (diff < -25) { inputs.left = true; inputs.right = false; }
+    else if (diff > 25) { inputs.right = true; inputs.left = false; }
     else { inputs.left = false; inputs.right = false; }
 }, {passive: true});
 
 window.addEventListener('touchend', () => {
     if (config.controlScheme !== 'SWIPE') return;
-    inputs.left = false;
-    inputs.right = false;
-    inputs.gas = false;
+    inputs.left = false; inputs.right = false; inputs.gas = false;
     touchStartX = 0;
 });
 
-// Run Framework Engine Loop Execution
-gameTickLoop();
+// Run Central Execution Pipeline Loop
+engineCoreLifecycleTick();
 </script>
 
 </body>
