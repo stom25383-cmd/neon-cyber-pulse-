@@ -23,9 +23,9 @@ jobs:
           cordova platform add android
           rm -rf www/*
           cp -r ../index.html www/
-          # Copy custom configs and icons if they exist
-          cp ../config.xml . 2>/dev/null || true
-          cp ../icon.png . 2>/dev/null || true
+          cp ../config.xml .
+          # Safe icon check
+          if [ -f "../icon.png" ]; then cp ../icon.png .; else echo "No icon found"; gpt_icon=false; fi
           
       - name: Set up JDK 17
         uses: actions/setup-java@v3
